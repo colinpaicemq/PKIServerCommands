@@ -1,0 +1,168 @@
+ // modify
+   /*Include standard libraries */
+ #pragma runopts(POSIX(ON))
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <string.h>
+ #include </usr/include/csfbext.h>
+ #include <cppkig.h>  // colin special
+ #include <printhx.h>  // colin special
+ #include <pkimsg.h>  // colin special
+ #include <gethex.h>  // colin special
+ #include <lookup.h>  // colin special
+int main( int argc, char *argv??(??))
+{
+#define MODIFYCERTS_PL
+   #include <cppki.h>  // colin special
+  int debug = 0;
+  int printIt = 1;
+  int k= sizeof(modifycerts_pl);
+  // extrace the parameters
+  int iArg;
+  rc = 0;
+//char comment[65]; defined in cppki
+  function_code = MODIFYCERTS;
+  for (iArg = 1;iArg< argc; iArg ++   )
+  {
+    if (strcmp(argv[iArg],"-debug") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      debug = atoi(argv[iArg]);
+    }
+    else
+    if (strcmp(argv[iArg],"-serial") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      char * pParm = argv[iArg];
+      printf("-serial %s\n",pParm);
+      int lParm = strlen(pParm);
+
+      if ( lParm > 16 )
+      {
+          printf("Serial is too long(%d) %s.\n",lParm,pParm);
+          return 8;
+      }
+      serialNum[0] = lParm;
+      memcpy(&serialNum[1],pParm,lParm);
+      modifycerts_pl.lSerialNum = lParm + 1;
+      if (debug > 0)
+      {
+       printf("Serial\n");
+       printHex(stdout,modifycerts_pl.pSerialNum,
+       modifycerts_pl.lSerialNum);
+      }
+    }
+    else
+    if (strcmp(argv[iArg],"-action") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      char * pParm = argv[iArg];
+      values actions[]  =
+      {
+       { "revoke",2},
+       { "delete",3},
+       { "resume",4},
+       { "disable",5},
+       { "enable",6},
+       { "crl",8},
+ //    { "post",7},
+       {0,-1}
+      };
+      values * pV = &actions[0] ;
+      rc = lookup(pV           ,pParm);
+      if (rc < 0)
+      {
+        printf("-action value not found %s\n",pParm);
+        return 8;
+      }
+      modifycerts_pl.action = rc;
+    }
+    else
+    if (strcmp(argv[iArg],"-reason") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      char * pParm = argv[iArg];
+      values actions[]  =
+      {
+       { "no",0},
+       { "none",0},
+       { "userkey",1},
+       { "cakey",2},
+       { "CAkey",2},
+       { "userchanged",3},
+       { "super",4},
+       { "superseded",4},
+       { "invalid",5},
+       { "suspend",6},
+       {0,-1}
+      };
+      values * pV = &actions[0] ;
+      rc = lookup(pV           ,pParm);
+      if (rc < 0)
+      {
+        printf("-reason value not found %s\n",pParm);
+        return 8;
+      }
+      modifycerts_pl.reason = rc;
+  }
+  }
+  if ( rc > 0)
+    return rc;
+
+  if (modifycerts_pl.lSerialNum == 0)
+  {
+     printf("No serial passed in\n");
+     return 8;
+  }
+  if (modifycerts_pl.action == 0)
+  {
+     printf("Invalid -action         \n");
+     return 8;
+  }
+  parmlist_version = 2; // needed for MODIFYCERTS and MODIFYREQS
+  attributes = 0;
+  safrc = 999;
+  racfrc = 999;
+  racfrs = 999;
+  rc =IRRSPX00(&work_area,
+        & alet,& safrc,
+        & alet,& racfrc,
+        & alet,& racfrs,
+        & number_parameters,
+        & function_code,
+        & attributes,
+        & log_string,
+        & parmlist_version,
+        & modifycerts_pl,
+        & CA_domain
+        );
+//printf("rc %i safrc %i racfrc %i racfrs %i\n",
+//     rc,safrc,racfrc,racfrs);
+//printHex(stdout,&modifycerts_pl,sizeof(modifycerts_pl));
+//printHex(stdout,modifycerts_pl.pSerialNum,
+//   modifycerts_pl.lSerialNum);
+
+  if (safrc+racfrc+racfrs > 0)
+  {
+    PKIMessage("MODIFYCERTS",safrc,racfrc,racfrs);
+    char * pError;
+    int lError;
+    pError =  modifycerts_pl.errList;
+    lError =  modifycerts_pl.errList[0];
+    if ( lError > 0)
+    printf("Error text returned:%*.*s.\n",lError,
+       lError,pError+1);  // past the length field
+    int lSerial = serialNum[0];
+//  printf("Serial:%*.*s.\n",lSerial,lSerial,&serialNum[1]);
+//  printHex(stdout,&serialNum[0],modifycerts_pl.lSerialNum);
+//  printHex(stdout,pError,32 );
+    return 8;
+  }
+  return 0;
+}

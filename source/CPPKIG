@@ -1,0 +1,5 @@
+
+typedef struct anchor   {
+  char serial[64];
+  char validity[41];
+} anchor;

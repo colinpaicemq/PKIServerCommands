@@ -1,0 +1,86 @@
+//COLACCES JOB
+//LOGP   EXEC PGM=ASMA90,PARM='DECK,NOOBJECT,LIST,XREF(SHORT)',
+//             REGION=4M
+//SYSLIB   DD DSN=SYS1.MACLIB,DISP=SHR
+//SYSUT1   DD UNIT=SYSDA,SPACE=(CYL,(1,1))
+//SYSPUNCH DD DISP=SHR,DSN=COLIN.OBJLIB(MYCHECK)
+//SYSPRINT DD SYSOUT=*
+//SYSIN    DD *
+*  Issue RACROUTE TYPE=AUTH to see if user has access to a resource
+* /////////////////////////////////////////////////////////////////////
+* MIT License
+*
+* Copyright (c) 2022 Colin Paice
+*
+* Permission is hereby granted, free of charge, to any person
+* obtaining a copy of this software and associated
+* documentation files (the "Software"), to deal in the Software
+* without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense,
+* and/or sell copies of the Software, and to permit persons to
+* whom the Software is furnished to do so, subject to the
+* following conditions:
+*
+* The above copyright notice and this permission notice shall
+* be included in all copies or substantial portions of the
+* Software.
+*
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY
+* KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE
+* WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR
+* PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR
+* COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR
+* OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+* SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+*
+* ================================================================
+**********************************************************************
+*     Input
+*     Register 1-> 31 bit address of storage
+**********************************************************************
+**********************************************************************
+*Process RENT
+QEDIT    CSECT
+QEDIT    AMODE 64
+QEDIT    RMODE ANY
+         PRINT GEN
+         BSM   14,0             We need this to return in the proper
+         BAKR  R14,0            Save for return
+         LGR   R3,R1            Save it for debug
+         XGR   R0,R0            QEDIT needs this to be 0
+*        XGR   R4,R4
+*        LLGTR R12,R4            Base register
+         LGR   12,15
+         USING *,12              MODULE ADDRESSABILITY
+         LG    R2,0(R1)          a(entity)
+         LG    R3,4(R1)          a(class)
+         LG    R4,8(R1)          a(workarea)
+         PRINT  GEN
+         RACROUTE REQUEST=AUTH,                                        x
+               ENTITYX=(R2),                                           *
+               CLASS=(R3),                                             *
+               WORKA=(R4),                                             *
+               STATUS=ACCESS,                                          *
+               RELEASE=2.1                                             *
+         PR
+*-------------------------------------------------------------------*
+R0       EQU  0
+R1       EQU  1
+R2       EQU  2
+R3       EQU  3
+R4       EQU  4
+R5       EQU  5
+R6       EQU  6
+R7       EQU  7
+R8       EQU  8
+R9       EQU  9
+R10      EQU  10
+R11      EQU  11
+R12      EQU  12
+R13      EQU  13
+R14      EQU  14
+R15      EQU  15
+         END
+//*

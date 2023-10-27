@@ -1,0 +1,115 @@
+int parsePKI(char *pCert ,char * pEnd, char * kw, char * value)
+{
+  typedef struct parms
+  {
+     char * arg;
+     char * name;
+     int length;
+  } parms;
+  parms validParms[] =
+  {
+    {"-sn","SerialNumber",64},
+    {"-nb","NotBefore",2},
+    {"-na","NotAfter",4},
+    {"-ea","EmailAddr",64},
+    {"-ua","UnstructAddr"    ,64},
+    {"-un","UnstructName"    ,64},
+    {"-ea","EmailAddr"    ,64},
+    {"-e","Email"        ,64},
+    {"-dnq","DNQualifier"  ,64},
+    {"-u"  ,"Uid"          ,64},
+    {"-cn"  ,"CommonName"     ,64},
+    {"-t"   ,"Title"          ,64},
+    {"-dn"  ,"DomainName"     ,64},
+    {"-ou"  ,"OrgUnit"        ,64},
+    {"-o"   ,"Org"            ,64},
+    {"-s"   ,"Street"         ,64},
+    {"-local"   ,"Locality"       ,64},
+    {"-sp"  ,"StateProv"      ,64},
+    {"-pc"  ,"PostalCode"     ,64},
+    {"-c"   ,"Country"        , 2},
+    {"-ku"  ,"KeyUsage"      , 20},
+    {"-eku" ,"ExtKeyUsage"  , 20},
+    {"-nb"  ,"NotBefore"      , 2 },
+    {"-na"  ,"NotAfter"       , 4 },
+    {"-aipa","AltIPAddr"      , 45},
+    {"-auri","AltURI"         ,255},
+    {"-ae"  ,"AltEmail"       ,100},
+    {"-ad"  ,"AltDomain"      ,100},
+    {"-ao"  ,"AltOther"       ,255},
+    {"-ne"  ,"NotifyEmail"    , 45},
+    {"-pk"  ,"PublicKey"      ,65535},
+    {"-ks"  ,"KeySize"        ,  4},
+    {"-ka"  ,"KeyAlg"         , 10},
+    {"-sw"  ,"SignWith"       , 45},
+    {"-him" ,"HostIdMap"      ,100},
+    {"-r"   ,"Requestor"      , 32},
+    {"-pp"  ,"PassPhrase"     , 32},
+    {"-u"   ,"Userid"         ,  8},
+    {"-l"   ,"Label"          , 32},
+    {"-label","Label"          , 32},
+    {"-cp"  ,"CertPolicies"   , 32},
+    {"-aic" ,"AuthInfoAcc"    ,255},
+    {"-critical","Critical"    , 32},
+    {"-ce"      ,"CustomExt"   ,1024},
+    {"-bc"      ,"BusinessCat" , 64},
+    {"-jc"      ,"JurCountry" ,  2},
+    {"-jsp"     ,"JurStateProv", 64},
+    {"-jl"      ,"JurLocality", 64}
+   } ;
+   int found = 4; // not found
+   int rc = 0 ;
+   int iParms;
+   char * pData = pCert;
+   for (iParms = 0; iParms < sizeof(validParms)/sizeof(parms);
+         iParms ++)
+   {
+      // if the short name matches
+      if (strcmp(validParms[iParms].arg, kw )== 0
+           // or the long name matches
+           // +1 to allow for the - prefix
+         ||( strlen(kw) == strlen(validParms[iParms].name) +1
+             && strcmp(validParms[iParms].name, kw+1) == 0
+           )
+         )
+      {
+        rc    = 0;
+        int len = strlen(value) ;
+        if (len >  validParms[iParms].length)
+        {
+          printf("%s value %s too long (%d).\n",
+             validParms[iParms].arg,
+             value     ,
+             strlen(value));
+          rc = 8;
+          break;
+        }
+        else // length is OK
+        {
+          // check there is space in the buffer
+          if (pData + 12 + 4 + len > pEnd)
+          {
+             rc = 8;
+             break;
+          }
+          memcpy(pData,"            ",12); // blank it
+          int lkw= strlen(validParms[iParms].name);
+          if (lkw > 12)
+          {
+            printf("Keyword %s is too big\n",validParms[iParms].name);
+            rc = 12;
+            break;
+          }
+          memcpy(pData,validParms[iParms].name,lkw);
+          pData += 12;         // past it
+          memcpy(pData,&len,4);  // length of object
+          pData += 4;
+          memcpy(pData,value,len);  // length of value
+          pData += len;
+          break;
+        }
+      }  // they match
+   }   // over array of parameters
+  if (rc == 0) return pData - pCert;
+  else return 0-rc;
+}

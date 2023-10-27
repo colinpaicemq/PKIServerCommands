@@ -1,0 +1,63 @@
+//COLGEN  JOB 'COLIN',CLASS=A,REGION=0M,COND=(4,LE)
+//JOBLIB JCLLIB ORDER=(COLIN.PKIICSF.C,CBC.SCCNPRC)
+// INCLUDE MEMBER=DEFS
+//* Compile the gen certificate code
+//*
+//*
+// EXPORT SYMLIST=(*)
+// SET LOG='LOG LOG'
+//CGEN     EXEC  CCPROC,PROG=CGEN,BINDOPTS=BINDGSK
+//ISTEST   EXEC PGM=CGEN,REGION=0M,PARMDD=MYPARMS
+//MYPARMS DD *,SYMBOLS=(EXECSYS)
+/
+ -detail 0
+ -debug 0
+ -cert
+ -ae colin@gmail.com
+ -aipa 9.20.4.6
+ -auri colin.sss.com
+ -nb 2
+ -na 1000
+ -cn "ColinTESTX6"
+ -c gb
+ -pp passphrase2
+ -ks 521
+ -ka NISTECC
+ -ou SSSYYY
+ -c gb
+ -r colinSeptZ@gmail.com
+ -o SSS
+ -ku docsign
+ -ku handshake
+ -sw PKI:
+//OTHER DD *
+ -BusinessCat "Colins business cat"
+ -sw "SAF:CERTAUTH/LOCAL2PKI CA"
+ -ca PKISERVD
+//STEPLIB  DD DISP=SHR,DSN=&LOADLIB
+//SYSPRINT DD SYSOUT=*,DCB=(LRECL=200)
+//SYSOUT   DD SYSOUT=*
+//SYSERR   DD SYSOUT=*
+ -log "COLI ZZZ"     #comment this is a comment before log
+ -log "&LOG"
+//
+//SAF      EXEC PGM=CGEN,REGION=0M,PARMDD=MYPARMS
+//MYPARMS DD *,SYMBOLS=(EXECSYS)
+/
+ -detail 0
+ -debug 4
+ -sw SAF:CERTAUTH/ABC
+ -req
+ -cn ColinPaice
+/*
+//OTHER DD *
+ -u COLIN
+ -label colinslabel
+ -r colinSeptX@gmail.com
+ -title Mr.
+ -mail colinpaice3@gmail.com
+//STEPLIB  DD DISP=SHR,DSN=&LOADLIB
+//SYSPRINT DD SYSOUT=*,DCB=(LRECL=200)
+//SYSOUT   DD SYSOUT=*
+//SYSERR   DD SYSOUT=*
+//

@@ -1,0 +1,35 @@
+char * ICSFMessage(char * function,int rc, int rs)
+{
+  char * pReturn = "";
+  if (rc == 0  && rs == 0) return 0;
+  else
+  if (rc == 4  && rs == 3017)  return 0;//  more data coming
+  printf("%s %d %d\n",function,rc,rs);
+  if (rc == 8  && rs ==16000)
+    printf("%s CSF problem - run off the end of the list?\n",
+     function);
+  else
+  if (rc == 8  && rs ==3019 )
+    printf("%s "
+ "The call to insert or delete a z/OS PKCS #11 token object\n"
+ "failed because the token was not found in the TKDS, "
+ "or a request to delete a PKCS #11 session object \n"
+ "failed because the token was not found.\n"
+ ,function);
+  if (rc == 8  && rs ==11000)
+    printf("%s "
+"The value specified for length parameter for a key token, key,"
+"or text field is not valid\n"
+"This can also occur if "
+"either the key type of the key or the "
+"algorithm of the key is unsupported by the callable service \n"
+ ,function);
+  else
+  if ( rs ==3026 )
+     printf(
+     "%s The z/OS PKCS #11 token or object handle syntax is invalid\n"
+     ,function);
+  else
+   printf("CSFPTRL %s rc:%d rs:%d\n",function,rc,rs);
+ //  4/3017 means perhaps more data
+}

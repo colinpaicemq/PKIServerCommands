@@ -1,0 +1,283 @@
+   /*Include standard libraries */
+ // query requests
+ #pragma runopts(POSIX(ON))
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <string.h>
+ #include </usr/include/csfbext.h>
+ #include <printhx.h>  // colin special
+ #include <cppkig.h>  // colin special
+ #include <pkimsg.h>  // colin special
+    char buffer[10];
+
+#include <stdio.h>
+#include <time.h>
+int main( int argc, char *argv??(??))
+{
+  char * pExpiry = 0;
+  char expireDate[11];
+#define QUERYREQS_PL.
+  #include <cppki.h>  // colin special
+
+ printf("====QUERYREQS===\n");
+//#include <quparse.h>
+  int loopCount;
+  function_code =  QUERYREQS;
+  certId[0]=0;
+  // we loop looking for certificates
+  // because the service does not support searching by certid
+  char * pCertid;
+  int lCertid;
+  int iArg ;
+  for (iArg = 1;iArg < argc; iArg ++   )
+  {
+    // do special processing first
+    //
+    // status
+    //
+    if (strcmp(argv[iArg],"-status") == 0
+       && iArg +1 < argc) // we have a value
+    {
+      iArg ++;
+      int i = 0;
+       char * status[] = {"all","pending","approved","completed",
+                         "rejected","rejectedn","preregistered"};
+      int lStatus = sizeof(status)/sizeof(status[0]);
+      for ( i = 0;i < lStatus ;i++)
+      {
+        if (strcmp(status[i],argv[iArg])!= 0) continue;
+           queryreqs_pl.criteriaStatus = i;
+           break;
+      }
+      if (i == lStatus)
+      printf("-status value is wrong:%s.\n",argv[iArg]);
+
+    }
+    if (strcmp(argv[iArg],"-ca") == 0
+          && iArg + 1 < argc ) // so we have parm after kw
+       {
+         char * pParm = argv[iArg+1];
+         printf("-ca is %s\n",pParm);
+         if (strlen(pParm) <= 8  )
+         {
+           CA_domain[0]= strlen(pParm);
+           memcpy(&CA_domain[1],pParm,strlen(pParm));
+           number_parameters = 6;
+         }
+         else
+         printf("-ca value too long\n");
+         iArg ++;
+       }
+    //
+    // -days
+    //
+    if (strcmp(argv[iArg],"-days") == 0
+       && iArg +1 < argc) // we have a value
+    {
+      iArg ++;
+      queryreqs_pl.criteriaDays = atoi(argv[iArg  ]);
+      if (queryreqs_pl.criteriaDays < 0)
+      printf("-days needs a positive value \n");
+      return 8;
+    }
+    //
+    // -expiry
+    //
+    else
+    //
+    if (strcmp(argv[iArg],"-expiry") == 0
+       && iArg +1 < argc) // we have a value
+    {
+      iArg ++;
+      int exp = atoi(argv[iArg]);
+      time_t t1, t3;
+      struct tm *t2;
+      t1 = time(NULL);
+      t2 = localtime(&t1);
+      t2 -> tm_mday += exp;
+      t3 = mktime(t2);
+      int s;
+      s=  strftime( expireDate, 11, "%Y/%m/%d", t2  );
+      printf("Expiry date earlier than %10.10s\n",
+      expireDate);
+      pExpiry = &expireDate[0];
+    }
+    //
+    // -name
+    //
+    else
+    if (strcmp(argv[iArg],"-name") == 0
+       && iArg +1 < argc) // we have a value
+    {
+      iArg ++;
+      int l = strlen(argv[iArg  ]);
+      if (l>32)
+        printf("-name value is too long -truncated to 32\n");
+
+      if (l > 32) l = 32;
+      memset(&criteriaName[1],' ',32);
+      memcpy(&criteriaName[1],argv[iArg  ] ,l);
+      criteriaName[0]=l;
+      int zz = criteriaName[0];
+    }
+    //
+    // -certid
+    //
+    else
+    if (strcmp(argv[iArg],"-certid") == 0
+       && iArg +1 < argc) // we have a value
+    {
+      iArg ++;
+      int l = strlen(argv[iArg  ]);
+      if (l>56)
+      {
+        printf("-cert value is too long -truncated to 56\n");
+        l = 56;
+      }
+      pCertid = argv[iArg  ] ;
+      lCertid = strlen(argv[iArg  ]);
+//    memset(&certId[1],' ',56);
+//    memcpy(&certId[1],argv[iArg+1] ,l);
+//    printf("certid %s\n",argv[iArg+1] );
+//    certId[0]=l;
+    }
+  }
+  printf("queryreqs_pl.criteriaStatus:%d\n",
+         queryreqs_pl.criteriaStatus);
+  printf("queryreqs_pl.criteriaDays  :%d\n",
+         queryreqs_pl.criteriaDays  );
+  printf("queryreqs_pl.criteriaName  :%32.32s\n",
+        &criteriaName[1]);
+//printf("cert                       :%56.56s\n",
+//      &certId[1]);
+
+//queryreqs_pl.criteriaDays = 0;
+//char criteriaName[33];
+//memset(&criteriaName[0],0,sizeof(criteriaName));
+  queryreqs_pl.criteriaName = &criteriaName[0];
+
+  for(loopCount = 1;; loopCount++ )
+  {
+    queryreqs_pl.certId              = &certId[0];
+    queryreqs_pl.resultsListLen = sizeof(resultsList);
+    rc =IRRSPX00(&work_area,
+        & alet,& safrc,
+        & alet,& racfrc,
+        & alet,& racfrs,
+        & number_parameters,
+        & function_code,
+        & attributes,
+        & log_string,
+        & parmlist_version,
+        & queryreqs_pl,
+        &CA_domain
+        );
+    if (safrc+racfrc+racfrs != 0) break;
+    //  update the 'next' record to find
+    char * pData = &resultsList[0];
+    memcpy(&certId[0],
+        pData,sizeof(certId));  // the first field is the certID number
+    long lData;
+    // if it has returned certs we are not interested in
+    // then retry the next one
+    if (memcmp(&certId[1],pCertid,lCertid)< 0 )
+       continue;
+    else
+    if (memcmp(&certId[1],pCertid,lCertid)> 0 )
+       break   ;
+    // else we have a match
+//  printf("rc %i safrc %i racfrc %i racfrs %i\n",
+//      rc,safrc,racfrc,racfrs);
+    #define PRINTDATA(a) \
+      lData = * pData;   \
+      printf("%6.d %s: %*.*s\n",loopCount,a,\
+             lData,lData,pData + 1);     \
+      pData += 1 + lData;
+     char * pCertId;
+     int    lCertId;
+     // update the certID number to current - for get next
+     // update the certID number for get next
+     //  1 byte length followed by 16 chars
+      pData = &resultsList[0];
+      lCertId =  * pData;
+     // see if we need to check the expiry dates
+      pCertId =  1+pData;
+
+      if ( pExpiry != 0)
+      {
+        // locate validity information
+        for(int i = 0; i < 4 ; i ++)
+        {
+          lData = * pData;   \
+          pData += 1 + lData;
+        }
+        int z = memcmp(pData +1+22, pExpiry,10) ;
+        if ( z  >  0)
+        continue;
+      }
+
+      pData = &resultsList[0];
+     // print everything
+      lCertId =  * pData;
+      pCertId =  1+pData;
+
+      short noApprovers = 0x01f0; // length 1 value '0'
+      PRINTDATA("CertId         ");
+      PRINTDATA("Requestors name");
+      PRINTDATA("Subject DN     ");
+      PRINTDATA("Issuer  DN     ");
+      PRINTDATA("Validity       ");
+      PRINTDATA("Key usage      ");
+      PRINTDATA("Status         ");
+      PRINTDATA("Created        ");
+      PRINTDATA("Modified       ");
+      PRINTDATA("ApplData       ");
+      PRINTDATA("Serial         ");
+      PRINTDATA("Prev Serial    ");
+      PRINTDATA("ExtKeyUsage    ");
+      PRINTDATA("QueryTime      ");
+      if (memcmp(pData,&noApprovers,2) == 0)
+//    if (memcmp(pData,0x01f0,2) == 0)
+      {
+        printf("%6.d No approvers\n",loopCount);
+        pData += 2 ;// move past the count of approvers
+      }
+      else
+      {
+        pData += 2 ;// move past the count of approvers
+        char * pEnd  = &resultsList[0]
+             + queryreqs_pl.resultsListLen;
+        for (;pData < pEnd;)
+        {
+         PRINTDATA("  Approver Userid");
+         PRINTDATA("  Approver Action");
+         PRINTDATA("  Approver Time  ");
+        }
+      }
+#ifdef del
+      int z =
+          &resultsList[0]  +
+            queryreqs_pl.resultsListLen
+          - pData;
+          printf("Remainder %d\n",z);
+      if ( pData <     &resultsList[0]  +
+            queryreqs_pl.resultsListLen)
+      {
+       printHex(stdout,pData,z );
+      }
+//    PRINTDATA("KeyId          ");
+#endif
+      printf("\n");
+  } // for
+  if((safrc ==8 && racfrc ==  8 && racfrs == 60) ||
+     (safrc ==0) );
+  else
+  {
+    printf("rc %i safrc %i racfrc %i racfrs %i\n",
+            rc,safrc,racfrc,racfrs);
+    printf("%s\n",PKIMessage("QUERYREQS" ,safrc,racfrc,racfrs));
+  }
+  return rc;
+}

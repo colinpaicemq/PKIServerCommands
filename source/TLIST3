@@ -1,0 +1,172 @@
+ // get all certificate for a token
+ #include <dntoder.h>
+ #pragma pack(1)
+ struct {
+     short count;
+     int name1;
+     short lData1;
+     int   data1   ;
+     int name2;
+     short lData2;
+     char data2[20];
+} called;
+    #pragma pack(reset)
+ char myID[20] ;  // saved value of the ID
+ void printSearchTemplate(char * pT,int LT);
+ void  getPart(char * pToken, char * pST,int  lST);
+ int getToken(char * pToken,char * pST,int lST)
+ {
+   printf("Gettoken  %32s\n",pToken);
+   union
+   {
+     int i;
+     char c[4];
+   } ic;
+   char * pST2 = pST;
+   int lST2  = lST;
+   int rc;
+   if ( debug > 0)
+   {
+     printf("TLIST3 debug\n");
+     printHex(stdout,pST2,lST2);
+     printHex(stdout,pToken,64);
+   }
+   rc = -1;
+   int rs = -1;
+   int exit_data_length = 0 ;
+   char exit_data[1];
+   int rule_array_count = 2;   // Object, ALL
+   char rule_array[16];
+   memcpy(&rule_array[0],"OBJECT  ALL     ",16);
+   char handle[44];
+   memset(&handle[0],' ',44);
+   memcpy(&handle[0],pToken,            32) ;
+   // printHex(stdout,&handle[0],sizeof(handle));
+   int lList = 44        ;
+   char output_list[44];
+   int handle_count= 1;
+   int iLoop;
+     //
+     //
+     //
+   if ( debug > 2) printSearchTemplate(pST2,lST2);
+   // All set up done
+   // Now loop getting one at a time
+   //
+   for (iLoop = 0;           ; iLoop ++)
+   {
+     CSFPTRL(
+        &rc,
+        &rs,
+        &exit_data_length,
+        &exit_data[0],
+        &handle[0],
+        &rule_array_count,
+        &rule_array[0],
+        &lST2,
+        pST2,
+        &lList,
+        &handle_count,
+        &output_list[0]);
+     if ( rc == 0 && rs == 0)break; // no more data
+     ICSFMessage("TLIST3:CSFPTRL Object ALL",rc,rs);
+     if (rc >= 8) break;
+     printf("List %32.32s Sequence:%8.8s Type:%1.1s\n",
+           &output_list,&output_list[32],&output_list[40]);
+     getDetail(&output_list[0]);
+     pXToken =&output_list[0];                // external token
+     memcpy(&handle[0],&output_list[0],44);
+     if ( detail >= 2)
+     {
+       called.count = 2;
+       called.name1 = CKA_CLASS;
+       called.lData1 = sizeof(called.data1);
+       called.data1 = CKO_PUBLIC_KEY;
+       called.name2 = CKA_ID   ;
+       called.lData2 = sizeof(myID);
+       memcpy(&called.data2[0],&myID,sizeof(myID));
+       getPart(pToken, (char *) &called,sizeof(called));
+
+       called.data1 = CKO_PRIVATE_KEY;
+       getPart(pToken, (char *) &called,sizeof(called));
+
+       called.data1 = CKO_DATA;
+       getPart(pToken, (char *) &called,sizeof(called));
+     } // detail > 0
+  }
+ }
+//
+// getpart - private/public/data
+//
+ void  getPart(char * pToken, char * pST,int  lST)
+ {
+   int rc;
+   rc = -1;
+   int rs = -1;
+   int exit_data_length = 0 ;
+   char exit_data[1];
+   int rule_array_count = 2;   // Object, ALL
+   char rule_array[16];
+   memcpy(&rule_array[0],"OBJECT  ALL     ",16);
+   char handle[44];
+   memset(&handle[0],' ',44);
+   memcpy(&handle[0],pToken,            32) ;
+   int lList = 44        ;
+   char output_list[44];
+   int handle_count= 1;
+     //
+     //
+     //
+   if ( debug > 2)
+   {
+   printf("getpart\n");
+   printSearchTemplate( pST ,lST );
+   }
+   // All set up done
+   // Now loop getting one at a time
+   //
+   CSFPTRL(
+        &rc,
+        &rs,
+        &exit_data_length,
+        &exit_data[0],
+        &handle[0],
+        &rule_array_count,
+        &rule_array[0],
+        &lST ,
+        pST ,
+        &lList,
+        &handle_count,
+        &output_list[0]);
+     if ( rc == 0 && rs == 0)       // no more data
+         return ;
+     ICSFMessage("TLIST3:CSFPTRL Object ALL",rc,rs);
+     if (rc >= 8) return;
+     printf("List %32.32s Sequence:%8.8s Type:%1.1s\n",
+           &output_list,&output_list[32],&output_list[40]);
+     getDetail(&output_list[0]);
+     return;
+ }
+ //
+ // printSearchTemplate
+ //
+ void printSearchTemplate(char * pT,int lT)
+ {
+     printf("==Search Template==\n");
+     short *  pCount = ( short *)  pT  ;
+     char * pCurr;
+     pCurr =  pT   + 2;
+     int lCount = * pCount;
+     struct attribute  * pAttribute;
+     printf("Attribute count %hd structure length %d\n",lCount,lT);
+     for (int i = 0;i < lCount; i ++)
+     {
+        pAttribute = (attribute  * ) pCurr;
+        printf("Attribute name %s(%d) Length %d\n",
+                getPkcsType(CKA    , pAttribute -> name),
+                pAttribute -> name,
+                pAttribute -> lValue);
+        printHex(stdout,&pAttribute ->value[0], pAttribute -> lValue);
+        pCurr = pCurr + 4 + 2 + pAttribute -> lValue;
+      }
+ }

@@ -1,0 +1,17 @@
+typedef struct values
+{
+   char * name;
+   int  value;
+} values;
+int lookup( values * table   , char * name)
+{
+  values * pValues;
+  // iterate over the list
+  for (pValues = & table[0];  pValues -> name  != (char * )0  ;
+       pValues++)
+  {
+    if ( strcmp(pValues -> name,name ) == 0)
+      return pValues-> value ;
+  }
+  return -1;
+}

@@ -1,0 +1,35 @@
+//COLAPP  JOB 'COLIN',CLASS=A,REGION=0M,COND=(4,LE)
+//JOBLIB JCLLIB ORDER=(COLIN.PKIICSF.C,CBC.SCCNPRC)
+//*
+//CGEN     EXEC  CCPROC,PROG=CAPPROVE
+//ISTEST   EXEC PGM=CAPPROVE,REGION=0M,PARMDD=MYPARMS
+//MYPARMS DD *
+/
+ -debug 0
+ -certid    1+bCeTJ0wPR02TbK6o++++++
+ -action approve
+ -comment "zz3znerapprove"
+/*
+ -enddate 2025/04/01
+ -auri colin.sss.com3
+ -o SSS3
+  -ku certsign
+  -ku docsign
+ -c zz
+ -o SSS2
+ -startdate 2023/08/07
+ -enddate 2025/06/01
+ -c zz
+  -cn "ColinAPPRP2VE"
+  -c gb
+  -ou SSSYYY
+  -c us
+  -o SSS2
+/* -c country zz
+//STEPLIB  DD DISP=SHR,DSN=COLIN.LOADDEMO
+//SYSPRINT DD SYSOUT=*,DCB=(LRECL=200)
+//SYSOUT   DD SYSOUT=*
+//SYSERR   DD SYSOUT=*
+//
+//CERT     DD DISP=SHR,DSN=COLIN.ECEC.CSR
+ -c zz

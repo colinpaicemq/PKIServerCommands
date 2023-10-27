@@ -1,0 +1,81 @@
+   int lST = 1000;
+   char searchTemplate[lST];
+   char * pEndTemplate; // current end of template.
+   char * pStart        ; // current end of template.
+   char * pCurr;        // end of used so far
+   pEndTemplate = &searchTemplate[0] + lST;
+   pStart       = &searchTemplate[0] + 2;
+   pCurr        = &searchTemplate[0] + 2;
+   // first 2 bytes are the count of records
+   short * pCount;
+   pCount = ( short *)  &searchTemplate[0] ;
+   *pCount = 0;
+   struct attribute  * pAttribute;
+
+   pAttribute = (attribute *) pCurr;
+   //always specify the certificate is needed
+   *pCount = *pCount +1;
+   // position the attribut to the free space
+   pAttribute = (attribute  * ) pCurr;
+   pAttribute -> name = CKA_CLASS      ;
+   pAttribute -> lValue = 4 ;
+   int certid = CKO_CERTIFICATE;
+   memcpy(&pAttribute->value[0],&certid,4);
+   // move pointer past
+   pCurr = pCurr + 4 + 2 +4; //type, len, value
+
+   int iArg ;
+   char * pDataz;
+   int lData = 0;
+   for (iArg = 1;iArg < argc; iArg ++   )
+   {
+     // display the parameters
+     if ( debug > 1)
+     {
+       printf("%s",argv[iArg]);
+       if (iArg +1 < argc)
+         printf(" %s",argv[iArg+1]);
+       printf("\n");
+     }
+
+     if (strcmp(argv[iArg],"-debug") == 0
+        && iArg +1 < argc) // we have a value
+     {
+       debug = atoi(argv[iArg+1]);
+       iArg ++;
+     }
+     else
+     if (strcmp(argv[iArg],"-token") == 0
+        && iArg +1 < argc) // we have a value
+     {
+       pToken =  argv[iArg+1];
+       iArg ++;
+     }
+     else
+     if (strcmp(argv[iArg],"-detail") == 0
+        && iArg +1 < argc) // we have a value
+     {
+       detail  = atoi(argv[iArg+1]);
+       iArg ++;
+     }
+     else
+     #include <parm2.h>
+     else
+     {
+       printf("Unrecognised argument %s\n",argv[iArg]);
+       rc = 8;
+     }
+   }
+   if ( rc > 0)
+   {
+     printf("Syntax is %s ",argv[0]);
+     printf("<-token value>  <-certid value>>"
+    " <-subject subjectDN> <-issuer issuerDN>"
+    " <-label label> <-serial serial>"
+    "\n");
+     return 8;
+   }
+ if ( pCurr == pStart ) lST =  0;
+ else
+ lST  = pCurr - &searchTemplate[0]    ;// it starts offset
+// printHex(stdout,&searchTemplate[0],lST);

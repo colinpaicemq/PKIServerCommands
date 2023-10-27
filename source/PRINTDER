@@ -1,0 +1,13 @@
+void printDER(char * pResult,char * pData)
+{
+  union
+  {
+    int i;
+    char c[4];
+  } ic;
+  // field is type ( 2= integer) length, value...
+  unsigned int l =*( pData +1); // past the type
+  ic.i = 0; // clear i
+  memcpy(&ic.c[4-l],pData +1 +1,l);
+  printf("      %s:0x%X.",pResult,ic.i);
+}

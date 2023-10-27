@@ -1,0 +1,128 @@
+ //  cert details
+   /*Include standard libraries */
+ #pragma runopts(POSIX(ON))
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <string.h>
+ #include </usr/include/csfbext.h>
+ #include <printhx.h>  // colin special
+ #include <pkimsg.h>  // colin special
+ #include <cppkig.h>  // colin special
+char * addValue(char * where,char * kw,char * value);
+int main( int argc, char *argv??(??))
+{
+   #define  CERTDETAILS_PARMLIST
+   #include <cppki.h>  // colin special
+   printf("====CERTDETAILS========\n");
+  // extract the parameters
+  int iArg;
+  for (iArg = 1;iArg< argc; iArg ++   )
+  {
+    if (strcmp(argv[iArg],"-serial") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      char * pParm = argv[iArg+1];
+      if (strlen(pParm) <= 16 )
+      {
+        serialNum[0]= strlen(pParm);
+        memcpy(&serialNum[1],pParm,strlen(pParm));
+      }
+      else
+      printf("-serial  value too long\n");
+      iArg ++;
+    }
+    if (strcmp(argv[iArg],"-ca") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      char * pParm = argv[iArg+1];
+      if (strlen(pParm) <= 8  )
+      {
+        CA_domain[0]= strlen(pParm);
+        memcpy(&CA_domain[1],pParm,strlen(pParm));
+        number_parameters = 6;
+      }
+      else
+      printf("-ca value too long\n");
+      iArg ++;
+    }
+  }
+  function_code = CERTDETAILS;
+//printf("Length of cert list %d\n",certDetails_parmlist.certPlistLen);
+//printf("Input Serial %8.8s\n",serialNum);
+  int loopCount;
+  {
+    rc =IRRSPX00(&work_area,
+        & alet,& safrc,
+        & alet,& racfrc,
+        & alet,& racfrs,
+        & number_parameters,
+        & function_code,
+        & attributes,
+        & log_string,
+        & parmlist_version,
+        & certDetails_parmlist,
+        &CA_domain
+        );
+    if (safrc+racfrc+racfrs != 0)
+    {
+     printf("rc %i safrc %i racfrc %i racfrs %i\n",
+        rc,safrc,racfrc,racfrs);
+     return 12;
+    }
+  }
+   char * pData = &sumList[0];
+   int  lData;
+   #define PRINTDATA(a) \
+      lData = * pData;   \
+      printf("%s:     %*.*s\n",a,lData,lData,pData + 1);     \
+      pData += 1 + lData;
+   memcpy(certDetails_parmlist.serialNum,
+   pData,17   );  // the first field is the serial number
+   // now format the always returned data
+   PRINTDATA("Serial         ");
+   PRINTDATA("Requestors name");
+   PRINTDATA("Subject DN     ");
+   PRINTDATA("Issuer  DN     ");
+   PRINTDATA("Validity       ");
+   PRINTDATA("Key usage      ");
+   PRINTDATA("Status         ");
+   PRINTDATA("Created        ");
+   PRINTDATA("Modified       ");
+   PRINTDATA("ApplData       ");
+   PRINTDATA("LastAction     ");
+   PRINTDATA("ExtKeyUsage    ");
+   PRINTDATA("PassPhrase     ");
+   PRINTDATA("Keyid          ");
+   PRINTDATA("SignAlg        ");
+   PRINTDATA("KeyType        ");
+   PRINTDATA("PublicKeySize  ");
+   printf("\n");
+   // end of the format
+  // now the cert plist
+  char * pEnd;
+  pEnd =  &certPlist[0]  + certDetails_parmlist.certPlistLen;
+  // now format the optional data
+  //printf("Length of cert list %d\n",certDetails_parmlist.certPlistLen);
+  //iterate over the data till we fall off the end
+  // data is 12_charname/int length/variable length data
+  for ( pData = &certPlist[0];
+        pData < pEnd;
+      )
+  {
+       memcpy(&lData,pData+12,4);
+       printf("%12.12s:   %*.*s\n",pData,lData,lData,pData + 12+4);
+       pData += 12 +4  + lData;
+  }
+  // end of formatting optional data
+  if (safrc+racfrc+racfrs == 0)
+  ; // do nothing
+  else
+  {
+    printf("rc %i safrc %i racfrc %i racfrs %i\n",rc,safrc,racfrc,racfrs);
+    PKIMessage("CERTDETAILS",safrc,racfrc,racfrs);
+    return 8;
+  }
+  return rc;
+}

@@ -1,0 +1,266 @@
+ // approve (mainage)
+   /*Include standard libraries */
+ #pragma runopts(POSIX(ON))
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <string.h>
+ #include </usr/include/csfbext.h>
+ #include <pkparse.h>  // colin special
+ #include <printhx.h>  // colin special
+ #include <pkimsg.h>  // colin special
+ #include <cppkig.h>  // colin special
+int debug = 0;
+int printIt = 1;
+ #include <reqdetai.h>  // colin special
+ #include <lookup.h>  // colin special
+int main( int argc, char *argv??(??))
+{
+#define MODIFYREQS_PL
+   #include <cppki.h>  // colin special
+  // extrace the parameters
+  int iArg;
+  rc = 0;
+  char * pStartDate = 0;
+  char * pEndDate = 0;
+  char * pTemp  = 0;
+  char * pCert = &certPlist[0];
+  // following is used to check size of certPlist is OK
+  char * pEnd  = &certPlist[0] +sizeof(certPlist);
+  memset(pCert,0,sizeof(certPlist));
+  // need to set up diag info as first element
+  memcpy(pCert,"DiagInfo    ",12);
+  pCert +=12;   // past description
+  int i80 = 80; // and its length
+  memcpy(pCert,&i80      ,4); // length
+  pCert +=4; // past the length field
+  pCert +=80;// size of the diagnostic fields
+  pTemp = pCert;
+  function_code = MODIFYREQS;
+  for (iArg = 1;iArg< argc; iArg ++   )
+  {
+    int found = 0;
+    if (strcmp(argv[iArg],"-certid") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      char * pParm = argv[iArg];
+      if (strlen(pParm) <= 57 )
+      {
+        certId[0]= strlen(pParm);
+        memcpy(&certId[1],pParm,strlen(pParm));
+        // save the length ... + 1 for length field.
+        modifyreqs_pl.certsIdLen = strlen(pParm) + 1 ;
+        modifyreqs_pl.certsId          = &certId[0];
+      }
+      else
+      printf("-certid value too long\n");
+      continue;
+    }
+    else
+    if (strcmp(argv[iArg],"-debug") == 0
+        && iArg +1 < argc) // we have a value
+    {
+          iArg  ++;
+          debug = atoi(argv[iArg]);
+          continue;
+    }
+    else
+    if (strcmp(argv[iArg],"-action") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      char * pParm = argv[iArg];
+      values actions[]  =
+      {
+         { "approve",1},
+         { "reject",2},
+         { "delete",3},
+         {0,-1}
+      };
+      values * pV = &actions[0] ;
+      modifyreqs_pl.action = lookup(pV           ,pParm);
+      if (modifyreqs_pl.action < 0)
+      {
+        printf("-action value not found %s\n",pParm);
+        return 8;
+      }
+      continue;
+    }
+
+    else
+    if (strcmp(argv[iArg],"-comment") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      int l = strlen(argv[iArg]);
+      if (l > 64)
+      {
+        printf("Comment is greater than 64:%s\n",
+        argv[iArg]);
+        rc = 8;
+      }
+      memcpy(&comment[1],argv[iArg],l);
+      comment[0] =  l;
+      continue;
+    }
+    else
+
+    if (strcmp(argv[iArg],"-startdate") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      int l = strlen(argv[iArg]);
+      if (l != 10)
+      {
+        printf("Invalid start date. YYYY/MM/DD:%s\n",
+        argv[iArg]);
+        rc = 8;
+      }
+      pStartDate = argv[iArg];
+      continue;
+    }
+    else
+
+    if (strcmp(argv[iArg],"-enddate") == 0
+       && iArg + 1 < argc ) // so we have parm after kw
+    {
+      iArg ++;
+      int l = strlen(argv[iArg]);
+      if (l != 10 )
+      {
+        printf("Invalid end date. YYYY/MM/DD:%s\n",
+        argv[iArg]);
+        rc = 8;
+      }
+      pEndDate = argv[iArg];
+//    printf("EndDate %s\n",pEndDate);
+      continue;
+    }
+    // end of special processing
+    // now process all of the certificate options
+    if (iArg+1 < argc) // make sure we have a value
+    {
+      found = parsePKI(pCert,pEnd,argv[iArg],argv[iArg+1]);
+    }
+    if (found >  0)
+    {
+      pCert += found;  /* size of data */
+      iArg ++; // over the value
+      continue;
+    }
+
+    else
+    {
+     printf("Unknown parameter %s\n",argv[iArg]);
+     rc = 8;
+    }
+  }
+  if ( rc > 0)
+  return rc;
+
+  if (modifyreqs_pl.certsIdLen == 0)
+  {
+     printf("No certificate passed in\n");
+     return 8;
+  }
+  if (modifyreqs_pl.action  == 0)
+  {
+     printf("Invalid -action         \n");
+     return 8;
+  }
+
+  // length = current place  - start
+  modifyreqs_pl.certPlistLen = pCert - &certPlist[0];
+  modifyreqs_pl.certPlist  = &certPlist[0];
+  char validity[41];
+  printf("Before details\n");
+  reqdetails(certId        ,&anchor1);
+
+  //
+  // if we had any changes, then we need to set up the dates
+  // as required by making a change
+  if (pTemp != pCert)  // we have updated the data
+  {
+    // start date
+    memcpy(pCert,"StartDate   ",12);
+    pCert +=12;   // past it
+    i80 = 10;
+    memcpy(pCert,&i80      ,4); // length
+    pCert +=4; // past the length field
+    if ( pStartDate == 0)  // not specified - used old
+       memcpy(pCert,&anchor1.validity[1],10);
+    else
+       memcpy(pCert,pStartDate,10);
+    pCert +=10;// size of the start date
+
+    // end   date
+    memcpy(pCert,"EndDate     ",12);
+    pCert +=12;   // past it
+    i80 = 10;
+    memcpy(pCert,&i80      ,4); // length
+    pCert +=4; // past the length field
+
+    if ( pEndDate == 0)  // not specified - used old
+    {
+       memcpy(pCert,&anchor1.validity[23],10);
+     }
+    else
+       memcpy(pCert,pEndDate,10);
+    pCert +=10;// size of the start date
+
+    modifyreqs_pl.certPlistLen = pCert - &certPlist[0] ;
+  }
+  else   // no change
+    modifyreqs_pl.certPlistLen = 0;
+
+  if (debug > 1)
+  {
+     printf("certPlist modifyreqs_pl.certPlist %d \n",
+                      modifyreqs_pl.certPlistLen);
+     printHex(stdout, modifyreqs_pl.certPlist,
+                      modifyreqs_pl.certPlistLen);
+  }
+
+  if (debug > 2)
+  {
+     printf("certPlist modifyreqs_pl. Action:%d\n",
+          modifyreqs_pl.action);
+     printHex(stdout,&modifyreqs_pl,
+                      sizeof(modifyreqs_pl));
+  }
+  parmlist_version = 2; // needed for MODIFYCERTS and MODIFYREQS
+  rc =IRRSPX00(&work_area,
+        & alet,& safrc,
+        & alet,& racfrc,
+        & alet,& racfrs,
+        & number_parameters,
+        & function_code,
+        & attributes,
+        & log_string,
+        & parmlist_version,
+        & modifyreqs_pl,
+        &CA_domain
+        );
+  printf("rc %i safrc %i racfrc %i racfrs %i\n",
+       rc,safrc,racfrc,racfrs);
+  if (safrc+racfrc+racfrs > 0)
+  {
+    PKIMessage("MODIFYREQS",safrc,racfrc,racfrs);
+    printHex(stdout,&certPlist[0],96);
+    char * pError;
+    int lError;
+    pError =  modifyreqs_pl.errList;
+    lError =  modifyreqs_pl.errList[0];
+    if ( lError > 0)
+      printf("Error text returned:%*.*s.\n",lError,
+    lError,pError+1);  // past the length field
+    printHex(stdout,pError,128);
+    return 8;
+  }
+  printf("After change\n");
+  reqdetails(certId        ,&anchor1);
+
+  return 0;
+}

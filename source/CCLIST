@@ -1,0 +1,28 @@
+//COLLIST JOB 'COLIN',CLASS=A,REGION=0M,COND=(4,LE)
+//JOBLIB JCLLIB ORDER=(COLIN.PKIICSF.C,CBC.SCCNPRC)
+//* Compile the code to list the PKI status
+// INCLUDE MEMBER=DEFS
+//*
+//CGEN     EXEC  CCPROC,PROG=CLIST
+//ISTEST   EXEC PGM=CLIST,REGION=0M,
+//   PARM=' -days  1                                         '
+//*  PARM='  -name colinSeptZ@gmail.com         '
+//*  PARM=' -status pending                                   '
+//*  PARM='                                                      '
+//*  PARM=' -status rejected                                     '
+//*  PARM='-certid 1+bBwH5fli5l2TbK6o++++++ '
+//*  PARM=' -status approved   -expiry 100                   '
+//*  PARM=' -status approved                                  '
+//*  PARM='-certid 1+bBxBOoDC3T2TbK6o++++++           '
+//STEPLIB  DD DISP=SHR,DSN=&LOADLIB
+//SYSPRINT DD SYSOUT=*,DCB=(LRECL=200)
+//SYSOUT   DD SYSOUT=*
+//SYSERR   DD SYSOUT=*
+//
+//   PARM=' '
+//   PARM=' '
+//   PARM='-certid 1+bBwCi6sOae2TbK6o+++++  '
+//   PARM=' -status rejected                                   '
+//   PARM='-certid 1+bBwB1Nbun72TbK6o++++++ '
+//   PARM=' -status approved                                     '
+//   PARM=' -status pending -certid 1+bBoPY4Mkg12TbK6o+ '

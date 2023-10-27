@@ -1,0 +1,142 @@
+// int reqdetails(char inCertId[57], char ** pSerial)
+int reqdetails(char inCertId[57],
+               anchor * pAnchor    )
+{
+#define REQDETAILS_PARMLIST
+   #include <cppki.h>  // colin special
+//memcpy(&certId,inCertId,sizeof(inCertId));
+  reqDetails_parmlist.certId = &inCertId[0] ;
+  function_code = REQDETAILS;
+printf("====REQDETAILS====\n");
+//printHex(stdout,&reqDetails_parmlist.certId,57);
+  int loopCount;
+  {
+    rc =IRRSPX00(&work_area,
+        & alet,& safrc,
+        & alet,& racfrc,
+        & alet,& racfrs,
+        & number_parameters,
+        & function_code,
+        & attributes,
+        & log_string,
+        & parmlist_version,
+        & reqDetails_parmlist,
+        & CA_domain
+        );
+    if (safrc+racfrc+racfrs != 0)
+    {
+        PKIMessage("REQDETAILS",safrc,racfrc,racfrs);
+        printf("rc %i safrc %i racfrc %i racfrs %i\n",
+                rc,safrc,racfrc,racfrs);
+        return 8;
+     return 12;
+    }
+  }
+// char * pData = &sumList[0];
+   char * pData = reqDetails_parmlist.sumList;
+   char * pEnd  = reqDetails_parmlist.sumList
+                    + reqDetails_parmlist.sumListLen;
+   int  lData;
+   if ( debug  > 0)
+   {
+      printf("reqDetails\n");
+      printHex(stdout,
+        reqDetails_parmlist.sumList,
+            reqDetails_parmlist.sumListLen);
+      printf("reqDetails lCert %d\n",
+          reqDetails_parmlist.certPlistLen);
+
+      printHex(stdout,
+        reqDetails_parmlist.certPlist,
+            reqDetails_parmlist.certPlistLen);
+
+  }
+  // only print it if requested
+   #define PRINTDATA(a,b) \
+      lData = * pData;   \
+      if (printIt >= b)  \
+      printf("%s: %*.*s\n",a,lData,lData,pData + 1);     \
+      pData += 1 + lData;
+// memcpy(certDetails_parmlist.certId,
+// pData,17   );  // the first field is the serial number
+   // now format the always returned data
+// printHex(stdout,pData,reqDetails_parmlist.sumListLen);
+   PRINTDATA("request ID        ",1);
+   PRINTDATA("Requestors name   ",1);
+   PRINTDATA("Subject DN        ",1);
+   PRINTDATA("Issuer  DN        ",1);
+//! OK
+   memcpy(&pAnchor ->validity[0],pData,     //  save it
+          sizeof(anchor1.validity));
+   PRINTDATA("Validity          ",1);
+   PRINTDATA("Key usage         ",1);
+   PRINTDATA("Status            ",1);
+   PRINTDATA("Created           ",1);
+   PRINTDATA("Modified          ",1);
+   PRINTDATA("ApplData          ",1);
+// printHex(stdout,pData,36);
+// * pSerial = pData;
+   memset(&pAnchor ->serial[0],0,sizeof(anchor1. serial));
+   memcpy(&pAnchor ->serial[0],pData,     //  save it
+          lData                   );
+   PRINTDATA("Serial            ",1);
+   PRINTDATA("Prev Serial       ",2);
+   PRINTDATA("Last action       ",1);
+   PRINTDATA("PassPhrase        ",2);
+   PRINTDATA("Email             ",1);
+   PRINTDATA("ExtKeyUsage       ",1);
+   PRINTDATA("FingerprintSHA1   ",2);
+   PRINTDATA("FingerprintSHA256 ",2);
+   PRINTDATA("Signature         ",1);
+   PRINTDATA("KeyType           ",1);
+   PRINTDATA("KeySize           ",1);
+   PRINTDATA("QueryTimestamp    ",2);
+   // at this point we may point to the number of approvers
+   short noApprovers = 0x01f0; // length 1 value '0'
+   if (memcmp(pData,&noApprovers,2) == 0)
+   {
+      printf("No approvers\n");
+     pData += 2 ;// move past the count of approvers
+   }
+   else
+   {
+     int count = atoi(pData+1);// the number... followed by
+     int iLoop;              //   data
+      printf("Approver count %d\n",count);
+
+     pData += 2 ;// move past the count of approvers
+     for (iLoop = 0; iLoop < count;iLoop++)
+     {
+      PRINTDATA("  Approver Userid ",1);
+      PRINTDATA("  Approver Action ",1);
+      PRINTDATA("  Approver Time   ",1);
+      PRINTDATA("  Approver Comment",1);
+     }
+   }
+   if (pData < pEnd)
+      printHex(stdout,pData,pEnd-pData);
+
+  // now the cert plist
+  pEnd =  &certPlist[0]  + reqDetails_parmlist.certPlistLen;
+  // now format the optional data
+  // only print it if requested
+  // data is 12_charname/int length/variable length data
+  if (printIt >= 2)
+  for ( pData = &certPlist[0];
+        pData < pEnd;
+      )
+  {
+       memcpy(&lData,pData+12,4);
+       printf("%12.12s:   %*.*s\n",pData,lData,lData,pData + 12+4);
+       pData += 12 +4  + lData;
+  }
+  // end of formatting optional data
+  if (safrc+racfrc+racfrs > 0)
+  {
+    printf("rc %i safrc %i racfrc %i racfrs %i\n",
+           rc,safrc,racfrc,racfrs);
+    PKIMessage("REQDETAILS",safrc,racfrc,racfrs);
+    return 8;
+  }
+  return rc;
+}

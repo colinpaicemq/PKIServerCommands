@@ -1,0 +1,262 @@
+#define GENCERT     0x0001
+#define QUERYREQS   0x0003
+#define REQDETAILS  0x0004
+#define MODIFYREQS  0x0005
+#define QUERYCERTS  0x0006
+#define CERTDETAILS 0x0007
+#define MODIFYCERTS 0x0008
+#define REQCERT     0x0009
+
+anchor anchor1;
+char certPlist[4096];
+char certId[57];
+char comment[65];
+comment[0]=0;    // no comment
+
+char criteriaName[33];
+memset(&criteriaName[0],0,sizeof(criteriaName));
+
+char errList[256];
+memset(&errList[0],0,sizeof(errList));
+
+char queryTime[20];
+queryTime[0] = 0; //
+
+char sumList[4096];
+char serialNum[17];
+
+int reqdetails(char inCertId[57],
+               anchor *  pAnchor   );
+// int reqdetails(char certId[57]);
+//int reqdetails(char certId[57], char ** pSerial);
+short int function_code;
+//ort int function_code = QUERYCERTS;
+int attributes = 0x00000000;
+struct   {
+  char length;
+  char value[80];
+} log_string;
+log_string.length = 80;
+memcpy(&log_string.value,"Colinlo        gzz",16);
+int parmlist_version = 0;
+memset(&certId[0],0,sizeof(certId));
+char resultsList[40960];
+int rc;
+char  CA_domain[9];
+int safrc;
+int racfrc;
+int racfrs;
+int alet = 0;
+char work_area[1024];
+memset(&work_area[0],0,1024);
+int number_parameters = 5;
+#ifdef QUERYREQS_PL
+//
+//  query requests
+//
+ struct {
+   char eyeCatcher[8];
+   int resultsListLen;
+   char * resultsList;
+   char * certId   ;
+   int numEntries;
+   int criteriaStatus;
+   int criteriaDays  ;
+   char * criteriaName;
+ } queryreqs_pl;
+
+  memset(&queryreqs_pl,0,sizeof(queryreqs_pl));
+  memcpy(&queryreqs_pl.eyeCatcher[0],"QUERYREQ",8);
+  queryreqs_pl.resultsListLen = sizeof(resultsList);
+  queryreqs_pl.resultsList         = &resultsList[0];
+  queryreqs_pl.certId              = &certId[0];
+  queryreqs_pl.numEntries          = 1;
+  queryreqs_pl.criteriaStatus = 0;
+  queryreqs_pl.criteriaDays = 0;
+  queryreqs_pl.criteriaName = &criteriaName[0];
+
+#endif
+#ifdef GENCERT_PARMLIST
+//
+// gencert
+//
+
+struct {
+  char eyeCatcher[8];
+  int certPlistLen;
+  char * certPlist;
+  char * certId;
+} gencert_parmlist;
+  memcpy(&gencert_parmlist.eyeCatcher[0],"GENCERT ",8);
+  gencert_parmlist.certPlistLen = -1;
+  gencert_parmlist.certPlist = &certPlist[0];
+  gencert_parmlist.certId = &certId[0];
+#endif
+#ifdef CERTDETAILS_PARMLIST
+// create the parmlist and initialise the fields
+//
+// Certdetails
+//
+struct {
+  char eyeCatcher[8];
+  int sumListLen;
+  char * sumList;
+  int certPlistLen;
+  char * certPlist;
+  char * serialNum;
+} certDetails_parmlist;
+// set it all to zeros
+  memset(&certDetails_parmlist,0,sizeof(certDetails_parmlist));
+  memcpy(&certDetails_parmlist.eyeCatcher[0],"CRTDTAIL",8);
+  //ar certId[57];
+  memset(&certId[0],0,sizeof(certId));
+  memset(&serialNum[0],0,17);
+  certDetails_parmlist.certPlist    = &certPlist[0];
+  certDetails_parmlist.certPlistLen = sizeof(certPlist);
+  certDetails_parmlist.sumListLen   = sizeof(sumList);
+  certDetails_parmlist.sumList      = &sumList[0];
+  certDetails_parmlist.serialNum     = &serialNum[0];
+#endif
+#ifdef REQDETAILS_PARMLIST
+//
+// reqDetails
+//
+struct {
+  char eyeCatcher[8];
+  int sumListLen;
+  char * sumList;
+  int certPlistLen;
+  char * certPlist;
+  char * certId;
+} reqDetails_parmlist;
+// set it all to zeros
+  memset(&reqDetails_parmlist,0,sizeof(reqDetails_parmlist));
+  memcpy(&reqDetails_parmlist.eyeCatcher[0],"REQDTAIL",8);
+  reqDetails_parmlist.certPlist     = &certPlist[0];
+  reqDetails_parmlist.certPlistLen  = sizeof(certPlist);
+  reqDetails_parmlist.sumListLen    = sizeof(sumList);
+  reqDetails_parmlist.sumList       = &sumList[0];
+  reqDetails_parmlist.certId        = &certId[0];
+#endif
+#ifdef QUERYCERTS_PARMLIST
+struct {
+  char eyeCatcher[8];
+  int resultsListLen;
+  char * resultsList;
+  char * serialNum;
+  int numEntries;
+  int criteriaStatus;
+  int criteriaDays  ;
+  char * criteriaName;
+   char * serialNumOrFingerPrt;
+} querycerts_parmlist;
+// Initialise it
+  memset(&querycerts_parmlist,0,sizeof(querycerts_parmlist));
+  memcpy(&querycerts_parmlist.eyeCatcher[0],"QUERYCTS",8);
+  querycerts_parmlist.resultsListLen = sizeof(resultsList);
+  querycerts_parmlist.resultsList  = &resultsList[0];
+  memset(&serialNum[0],0,17);
+  querycerts_parmlist.serialNum    = &serialNum[0];
+  querycerts_parmlist.numEntries   = 1;
+  querycerts_parmlist.criteriaStatus = 0;
+  querycerts_parmlist.criteriaDays = 0;
+  querycerts_parmlist.criteriaName = &criteriaName[0];
+#endif
+#ifdef MODIFYCERTS_PL
+//
+//modifycerts
+//
+struct {
+  char eyeCatcher[8];
+  int action;
+  char * comment;
+  int lSerialNum;
+  char * pSerialNum ;
+  int reason;
+  char * requestorEmail;
+  int errListLen;
+  char * errList;
+} modifycerts_pl;
+// Initialise it
+  memset(&modifycerts_pl,0,sizeof(modifycerts_pl));
+  memcpy(&modifycerts_pl.eyeCatcher[0],"MODIFYCE",8);
+
+  modifycerts_pl.comment = & comment[0];
+  modifycerts_pl.lSerialNum = 0;             // no modifications
+  // modifycerts_pl.serialNumId   = 0;     // no buffer
+modifycerts_pl.pSerialNum    =  &serialNum[0];
+
+modifycerts_pl.errList = & errList[0];
+modifycerts_pl.errListLen = sizeof(errList);
+#endif
+#ifdef MODIFYREQS_PL
+//
+// modify  reqs
+//
+struct {
+  char eyeCatcher[8];
+  int action;
+  char * comment;
+  int certsIdLen;
+  char * certsId;
+  int certPlistLen;
+  char * certPlist;
+  int errListLen;
+  char * errList;
+  char * queryTime;
+} modifyreqs_pl;
+// Initialise it
+
+//char comment[65];
+//comment[0]=0;    // no comment
+  memset(&modifyreqs_pl,0,sizeof(modifyreqs_pl));
+
+  memcpy(&modifyreqs_pl.eyeCatcher[0],"MODIFYRQ",8);
+  modifyreqs_pl.comment = & comment[0];
+  modifyreqs_pl.certPlistLen = 0;           // no modifications
+  modifyreqs_pl.certPlist          = 0;     // no buffer
+
+  memset(&errList[0],0,sizeof(errList));
+  modifyreqs_pl.errList = & errList[0];
+  modifyreqs_pl.errListLen = sizeof(errList);
+
+// modifyreqs_pl.queryTime        = &queryTime[0];
+  modifyreqs_pl.queryTime        = 0;
+#endif
+//char serialNum[17];
+//memset(&serialNum[0],0,17);
+#ifdef QUERYCERTS_PL
+//
+// query certs
+//
+ struct {
+   char eyeCatcher[8];
+   int resultsListLen;
+   char * resultsList;
+   char * serialNum;
+   int numEntries;
+   int criteriaStatus;
+   int criteriaDays  ;
+   char * criteriaName;
+   char * serialNumOrFingerPrt;
+ } querycerts_pl;
+   memset(&querycerts_pl,0,sizeof(querycerts_pl));
+   memcpy(&querycerts_pl.eyeCatcher[0],"QUERYCTS",8);
+  //har serialNum[17];
+// memset(&serialNum[0],0,17);
+  //har resultsList[4096];
+   memset(&serialNum[0],0,17);
+  //har resultsList[4096];
+   querycerts_pl.resultsListLen = sizeof(resultsList);
+   querycerts_pl.resultsList        = &resultsList[0];
+   querycerts_pl.serialNum          = &serialNum[0];
+   querycerts_pl.numEntries         = 1;
+   querycerts_pl.criteriaStatus = 0;
+   querycerts_pl.criteriaDays = 0;
+   querycerts_pl.serialNumOrFingerPrt =0;
+  //har criteriaName[33];
+   memset(&criteriaName[0],0,33);
+   querycerts_pl.criteriaName = &criteriaName[0];
+
+
+#endif

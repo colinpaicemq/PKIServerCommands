@@ -1,0 +1,146 @@
+// #define _XOPEN_SOURCE 600
+// fine _XOPEN_SOURCE                /* Required for optarg, optind */
+// #pragma runopts(POSIX(ON))
+//#define _POSIX_SOURCE                /* Required for sleep()        */
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+//    #include <assert.h>
+int main( int argc, char *argv??(??))
+{
+#ifdef zzzz
+   char * debug = "Not specified";
+   char * type   = "Not specified";
+   typedef struct getStr
+   {
+      char * name;
+      char ** value;
+   } getStr;
+   getStr lookUpStr[] = {
+       {"-debug", &debug     },
+       {"-type",  &type       },
+       {(char *) -1,  0}
+      };
+  int iArg;
+  for (iArg = 1;iArg< argc; iArg ++   )
+  {
+    int found = 0;
+    getStr * pGetStr =&lookUpStr[0];
+    for (; pGetStr -> name != (char *)  -1; pGetStr ++)
+    {
+      printf("30 %s %s\n",pGetStr ->name,  argv[iArg]);
+      if (strcmp(pGetStr ->name, argv[iArg]) == 0)
+      {
+        printf("34      \n");
+        found = 1;
+        iArg ++;
+        if ( iArg < argc)
+        {
+        *( pGetStr -> value)= argv[iArg] ;
+//       memcpy(*(pGetStr -> value),argv[iArg],4);
+
+        }
+        else
+       { printf("Missing value for %s\n", argv[iArg]);
+       }
+       break;
+     }  // if (strcmp(pGetStr ->name, argv[iArg]) == 0)
+     if (found > 0) break;
+    } // for (; pGetStr -> name != (char *)  -1; pGetStr ++)
+  }
+  printf("Debug %s\n",debug);
+  printf("Type  %s\n",type );
+  return 0;
+}
+#endif
+#ifdef del3
+ enum {
+       RO_OPT = 0,
+       RW_OPT,
+       NAME_OPT
+   };
+   char *const token[] = {
+       [RO_OPT]   = "ro",
+       [RW_OPT]   = "rw",
+       [NAME_OPT] = "name",
+       NULL
+   };
+   char *subopts;
+   char *value;
+   int opt;
+   int readonly = 0;
+   int readwrite = 0;
+   char *name = NULL;
+   int errfnd = 0;
+   subopts = argv[1];
+   printf("PARM:%s\n",argv[1]);
+   while (*subopts != '\0' && !errfnd) {
+   printf("Inside while\n");
+     switch (getsubopt(&subopts, token, &value)) {
+     case RO_OPT:
+         printf("RO_OPT specified \n");
+         break;
+     case RW_OPT:
+         printf("RO_OPT specified \n");
+         break;
+     case NAME_OPT:
+         if (value == NULL) {
+            printf("Missing value for "
+                   "suboption '%s'\n", token[NAME_OPT]);
+             continue;
+         }
+         else
+         printf("NAME_OPT value:%s\n",value);
+         break;
+         default:
+         fprintf(stderr, "No match found "
+                 "for token: /%s/\n", value);
+         break;
+     }  // switch
+    } // while
+    printf("arg2 %s\n",argv[2]);
+#endif
+#ifdef no2
+extern char
+*optarg;
+int opt;
+opterr = 0;
+while ((opt = getopt(argc, argv, "ab:c:")) != -1)
+   {
+       switch (opt) {
+       case 'a':
+           printf("-a received\n");
+           break;
+       case 'b':
+           printf("-b received \n");
+           printf("optarg %d\n",optarg);
+           if (optarg)
+             printf("-b received value %s\n",optarg);
+           else
+             printf("-b optarg is0       \n");
+           break;
+       case 'c':
+           printf("-c received\n");
+           printf("optarg %d\n",optarg);
+           if (optarg)
+             printf("-c received value %s\n",optarg);
+           else
+             printf("-c optarg is0       \n");
+           break;
+       default: /* '?' */
+           printf("Unknown n");
+     }
+   }
+  return 0;
+}
+#endif
+#ifdef no
+  int iArg;
+  for (iArg = 1;iArg< argc; iArg ++   )
+  {
+    printf(".%s.\n",argv[iArg]);
+  }
+  return 0;
+}
+  #endif

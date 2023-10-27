@@ -1,0 +1,47 @@
+    -sn         ,SerialNumber,64
+    -nb         ,NotBefore,2
+    -na         ,NotAfter,4
+    -ea         ,EmailAddr,64
+    -ua         ,UnstructAddr ,64
+    -un         ,UnstructName ,64
+    -ea         ,EmailAddr ,64
+    -e          ,Email       ,64
+    -dnq        ,DNQualifier ,64
+    -u          ,Uid        ,64
+    -cn         ,CommonName ,64
+    -t          ,Title        ,64
+    -dn         ,DomainName ,64
+    -ou         ,OrgUnit      ,64
+    -o          ,Org          ,64
+    -s          ,Street       ,64
+    -l          ,Locality     ,64
+    -sp         ,StateProv    ,64
+    -pc         ,PostalCode ,64
+    -c          ,Country      , 2
+    -ku         ,KeyUsage    , 20
+    -eku        ,ExtKeyUsage , 20
+    -nb         ,NotBefore    , 2
+    -na         ,NotAfter     , 4
+    -aipa       ,AltIPAddr     , 45
+    -auri       ,AltURI        ,255
+    -ae         ,AltEmail     ,100
+    -ad         ,AltDomain    ,100
+    -ao         ,AltOther     ,255
+    -ne         ,NotifyEmail , 45
+    -pk         ,PublicKey    ,65535
+    -ks         ,KeySize      ,  4
+    -ka         ,KeyAlg       , 10
+    -sw         ,SignWith     , 45
+    -him        ,HostIdMap     ,100
+    -r          ,Requestor    , 32
+    -pp         ,PassPhrase , 32
+    -u          ,Userid       ,  8
+    -l          ,Label        , 32
+    -cp         ,CertPolicies , 32
+    -aic        ,AuthInfoAcc ,255
+    -critical   ,Critical      , 32
+    -ce         ,CustomExt ,1024
+    -bc         ,BusinessCat , 64
+    -jc         ,JurCountry , 2
+    -jsp        ,JurStateProv, 64
+    -jl         ,JurLocality, 64

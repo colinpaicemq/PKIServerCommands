@@ -1,0 +1,121 @@
+#ifdef defl
+   #define lST               1000
+     #pragma pack(1)
+     // int   lSearchTemplate =2+ // number of attr
+     //                               4+ // Attrib
+     //                               2 +// L'value
+     //                               12;// Value
+    struct                {
+       short count;
+       char attributes[lST];
+//     int attribute;
+//     short lValue;
+//      char value[32];
+      } searchTemplate;
+#endif
+ {
+   int lST = 1000;
+   char searchTemplate[lST];
+   char * pEndTemplate; // current end of template.
+   char * pCurr         // end of used so far
+   pEndTemplate = &searchTemplate + lST;
+   pCurr        = &searchTemplate + 2;
+
+     #pragma pack(1)
+   typdef struct  attribute {
+       int name;
+       short lValue;
+       char value[1];
+      } attribute     ;
+     #pragma pack(reset)
+   struct attribute  * pAttribute;
+
+   pAttribute =  pCurr;
+   int iArg ;
+   for (iArg = 1;iArg < argc; iArg ++   )
+   {
+     if (strcmp(argv[iArg],"-token") == 0
+        && iArg +1 < argc) // we have a value
+     {
+       pToken =  argv[iArg+1];
+       iArg ++;
+     }
+     else
+     if (strcmp(argv[iArg],"-detail") == 0
+        && iArg +1 < argc) // we have a value
+     {
+       detail  = atoi(argv[iArg+1]);
+       iArg ++;
+     }
+     else
+     #include <parm2.h>
+#ifdef del
+     //
+     //  Now parameters for filtering
+     //
+     if (strcmp(argv[iArg],"-certid") == 0
+        && iArg +1 < argc) // we have a value
+     {
+       pCertID = argv[iArg+1];
+       iArg ++;
+       if ( strlen(pCertID) > 32)
+       {
+          printf("Certificate label is too long (32) %d\n",
+                  strlen(pCertID));
+          rc = 8;
+       }
+      int iLen = strlen(pCertID);
+      if ( iLen > 32 )
+      {
+          printf("Label is too long(%d) %s.\n",iLen,pCertid);
+          return 8;
+      }
+      if (pCurr  + 4 + 2 + iLen)  > pEndTemplate
+      {
+         printf("too much data in parameters \n");
+         return  8;
+      }
+      searchTemplace.count += 1;
+      pAttribute = (attribute  * ) pCurr;
+      pAttribute -> name = CKA_LABEL;
+      pAttribute -> lValue = 32;
+      memset(&pAttribute ->value[0],' ',32);
+      memcpy(&pAttribute->value[0],pCertID,iLen);
+      // move pointer past
+      pCurr = pCurr + 4 + 2 + 32;
+       #ifdef del
+      searchTemplate.lValue   = sizeof(searchTemplate.value);
+      memset(&searchTemplate.value[0],' ',sizeof(searchTemplate.value));
+      searchTemplate.count = 1;
+      searchTemplate.attribute = CKA_LABEL ;
+      searchTemplate.lValue   = sizeof(searchTemplate.value);
+      memset(&searchTemplate.value[0],' ',sizeof(searchTemplate.value));
+      int iLen = strlen(pCertID);
+      if ( iLen > 32 )
+      {
+          printf("Label is too long \n");
+          lSearchTemplate = 0;
+      }
+      else
+      {
+        memcpy(&searchTemplate.value[0],pCertID,iLen);
+//      printf("Label:%.32s\n.",&searchTemplate.value[0]);
+//      lSearchTemplate = sizeof(searchTemplate);
+//      printHex(stdout,&searchTemplate,lSearchTemplate);
+#endif
+      }
+     }
+#endif
+     else
+     {
+       printf("Unrecognised argument %s\n",argv[iArg]);
+       rc = 8;
+     }
+   }
+   if ( rc > 0)
+   {
+     printf("Syntax is %s ",argv[0]);
+     printf("-token value <-key value > <-certid value>>\n");
+     return 8;
+   }
+ lSearchTemplate = pCurr - ((char *) searchTemplate) - 2;

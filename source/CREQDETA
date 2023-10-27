@@ -1,0 +1,82 @@
+   /*Include standard libraries */
+   // request details
+ #pragma runopts(POSIX(ON))
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <string.h>
+ #include </usr/include/csfbext.h>
+ #include <printhx.h>  // colin special
+ #include <cppkig.h>  // colin special
+ #include <pkimsg.h>  // colin special
+ int debug = 0 ;
+char * addValue(char * where,char * kw,char * value);
+int printIt = 2;
+int main( int argc, char *argv??(??))
+{
+  #include <cppki.h>  // colin special
+  char * pCert = 0;
+  int iArg;
+  char validity[41];
+  rc = 0;
+  for (iArg = 1;iArg< argc; iArg ++   )
+  {
+    // do special processing first
+    if ((strcmp(argv[iArg],"-cert") == 0
+         || strcmp(argv[iArg],"-certID") == 0
+         )
+         && iArg +1 < argc  // we have a value
+       )
+    {
+      iArg ++;
+      pCert   = argv[iArg  ];
+      int iLen = strlen(pCert  );
+      if ( iLen            > 32)
+      {
+         printf("Certificate label is too long (32) %d\n",
+                 strlen(pCert  ));
+         rc = 8;
+      }
+      continue;
+    }
+    else
+    if (strcmp(argv[iArg],"-debug") == 0
+       && iArg +1 < argc) // we have a value
+    {
+      iArg ++;
+      debug = atoi(argv[iArg]);;
+      continue;
+    }
+    else
+//  if ((strcmp(argv[iArg],"-cert") == 0
+//       || strcmp(argv[iArg],"-certID") == 0
+//       )
+//       && iArg +1 < argc  // we have a value
+//     )
+//     {
+//     pCert = argv[iArg+1];
+ //    iArg ++;
+ //    }
+ //else
+   {
+     printf(" syntax is %s -cert label <-debug n>\n",argv[0]);
+     printf(" %s\n",argv[iArg]);
+     return 8;
+   }
+   }
+  char cert[57];
+  int lCert = strlen(pCert);
+  if (lCert > 56)
+  {
+    printf("Label is too long %s\n",pCert);
+    return 8;
+  }
+  memset(&cert[0],0,sizeof(cert));
+  memcpy(&cert[1],pCert,lCert);
+  cert[0] = lCert;
+  reqdetails(cert,&anchor1);
+  rc = 0;
+  return rc;
+}
+#include <reqdetai.h>  // colin special

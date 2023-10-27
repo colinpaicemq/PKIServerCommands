@@ -1,0 +1,28 @@
+// offset is the offset for the 2nd + line
+void hexdata (int offset,char * pData, int length )
+{
+#ifndef HEXDATA_INCLUDE
+#define HEXDATA_INCLUDE
+#include <ctype.h>
+  int  i, j;
+  unsigned char *pbuff = (unsigned char*)pData;
+  long bytesleft;
+  char printchar;
+  int lOffset = 0;
+//printf("\n");
+  for( i=0; i<length; i+=32, pbuff+=32 )
+  {
+    if (lOffset > 0)
+    printf("%*.*s",lOffset,lOffset," "); // indent it
+    if( (bytesleft=length-i) >= 32 )
+            bytesleft=32;
+    for( j=0; j<bytesleft; j++ ) {
+            if(j % 4 == 0) printf(" %2.2X",*(pbuff+j));
+            else printf("%2.2X",*(pbuff+j));
+    }
+    printf("\n");// indent it
+    lOffset = offset;
+  }
+  return;
+}
+#endif

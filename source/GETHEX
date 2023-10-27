@@ -1,0 +1,36 @@
+ // routine to convert char string to a hex string with leading
+ // length.
+ // This is complicated by DER saying top bit of number is sign
+ // So value 0xa0 needs to be 0x00a0
+ #define DER 1
+ #define NODER 0
+ int getHex(int len, char * pData, char * pBuffer, int isDer)
+ {
+    char sscan[20];   // used for sscanf string
+    // we need to covert an ebcdic string to hex, so
+    //  "1" needs length of 1,
+    //  "12" needs lengh of 1
+    //  "123" needs length of 2 etc
+    int lHex = (len + 1) /2;
+
+    // convert to %4ddx
+    // create a string for the sscan with the length
+    // as it needs a hard coded length
+    sprintf(&sscan[0],"%%%dhhx\0", len);
+    char temp[16];
+    sscanf(pData,&sscan[0],&temp[0]);
+    int lReturn;
+    if (isDer == DER  && temp[0] >=0x80)
+    {
+      *(pBuffer+1) = 0x00; // insert extra null
+      memcpy(pBuffer+2,&temp[0],lHex); // and the rest
+      lHex +=1            ;// +1 for pad
+    }
+    else // we need to insert extra so we do not get -ve
+    {
+      memcpy(pBuffer+1,&temp[0],lHex);
+      lReturn = lHex    ;
+    }
+    *pBuffer = lHex    ; // char value of the length
+    return lHex + 1;   // include length field
+}

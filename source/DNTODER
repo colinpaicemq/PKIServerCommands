@@ -1,0 +1,28 @@
+int  string_to_DER(char * pData, gsk_buffer * stream)
+
+{
+  int rc;
+  if (debug >=2) printf("string_to_DER:%s.\n",pData);
+  x509_name  myX509;
+  rc = gsk_dn_to_name(
+              pData,
+              &myX509);
+  if ( rc != 0)
+     {
+       printf("\nInternal error:gsk_dn_to_name %s %s\n",
+                    pData,
+                    gsk_strerror(rc));
+       return 8;
+     }
+  rc = gsk_encode_name (
+     &myX509, stream);
+  if ( rc != 0)
+     {
+       printf("\nInternal error:gsk_encode_name %s\n",
+                    gsk_strerror(rc));
+       return 8;
+     }
+// printf("%s.",pName);
+  gsk_free_name(&myX509);
+ return 0;
+}

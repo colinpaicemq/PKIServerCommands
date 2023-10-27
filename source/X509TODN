@@ -1,0 +1,44 @@
+void x509_to_string(char * pData,int lData)
+
+{
+   x509_name    X509;
+   int rc;
+   char * pName ;
+   gsk_buffer cert;
+   if (lData == 0)
+   {
+      printf("no data");
+      return;
+   }
+   cert.length=   lData;
+   cert.data  =   pData ;
+   // convert from 0x302F310B 30090603 to internal
+   rc = gsk_decode_name(
+       & cert,
+       & X509);
+  if ( rc != 0)
+     {
+       gsk_free_name(&X509);
+       printf("\nInternal error:gsk_decode_name %s\n",
+                    gsk_strerror(rc));
+       return;
+     }
+    // convert from internal to CN=COLIN,C=GB
+   rc = gsk_name_to_dn(
+              &X509,
+              &pName);
+   if ( rc != 0)
+     {
+       printf("\nInternal error:gsk_name_dn %s\n",
+                    gsk_strerror(rc));
+       return;
+     }
+   printf("%s.",pName);
+   gsk_free_name(&X509);
+   if ( rc != 0)
+     {
+       printf("\nInternal error:gsk_free_name%s\n",
+                    gsk_strerror(rc));
+       return;
+     }
+}

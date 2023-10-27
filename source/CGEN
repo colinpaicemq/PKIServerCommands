@@ -1,0 +1,327 @@
+ /*Include standard libraries */
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <string.h>
+ // #include </usr/include/csfbext.h>
+ #include <cppkig.h>  // colin special
+ #include <printhx.h>  // colin special
+ #include <pkimsg.h>  // colin special
+ #include <pkparse.h>  // colin special
+ #include <PKCS11.h>  // colin special
+ #pragma runopts(POSIX(ON))
+ #include <gskcms.h>
+ #include <gskssl.h>
+ #include <ICSFMSG.h>
+ #include <X509TODN.h>
+ #include <hexdata.h>
+ #include <gethex.h>
+  #include <cka.h>
+  int getToken(char * pToken,char * pST,int lST);
+// char * addValue(char * where,char * kw,char * value);
+int readFile(char * buffer,int l);
+int detail = 0;
+int debug  = 0;
+int printIt = 1;
+char * DERSerial = 0;
+char * pSerial = 0;
+char * pXToken  = 0;
+int main( int argc, char *argv??(??))
+{
+ #define GENCERT_PARMLIST
+ #include <cppki.h>  // colin special
+
+ attributes = 0x80000000;
+
+  char * pCert = &certPlist[0];
+  // following is used to check size of certPlist is OK
+  char * pEnd  = &certPlist[0] +sizeof(certPlist);
+  memset(pCert,0,sizeof(certPlist));
+  memcpy(pCert,"DiagInfo    ",12);
+  pCert +=12;   // past it
+  int i80 = 80;
+  memcpy(pCert,&i80      ,4); // length
+  pCert +=4; // past the length field
+  pCert +=80;// size of the diagnostic fields
+  char fileBuffer[4096];
+  int l;
+  function_code = 0; // preset this
+  int iArg;
+  int needRequestor = 1;
+  int needSW        = 1;
+  rc = 0;
+  int iParms;
+  //
+  int inComment = FALSE;
+  printf("Args:");
+  for (iArg = 1;iArg< argc; iArg ++   )
+  {
+    if (argv[iArg][0]== '#')
+    {
+    // we have a comment
+      inComment = TRUE;
+      printf("#... ");
+      continue;
+    }
+    if (inComment == TRUE)
+    {
+      if (argv[iArg][0] != '-' )
+         continue;
+      inComment = FALSE;
+    }
+    printf("%s ",argv[iArg]);
+  }
+  printf("\n",argv[iArg]);
+  //
+  for (iArg = 1;iArg< argc; iArg ++   )
+  {
+    if (argv[iArg][0]== '#')
+    {
+      // we have a comment
+      inComment = TRUE;
+      continue;
+    }
+    if (inComment == TRUE)
+    {
+      if (argv[iArg][0] != '-' )
+         continue;
+      inComment = FALSE;
+    }
+    int found = 0;
+    // do special processing first
+    if (strcmp(argv[iArg],"-r") == 0 )
+      needRequestor = 0;
+    if (strcmp(argv[iArg],"-sw" ) == 0 )
+       needSW = 0;
+    if (strcmp(argv[iArg],"-req") == 0
+       || strcmp(argv[iArg],"-request") == 0
+       )
+      {
+        printf("in -req\n");
+        function_code = REQCERT   ;
+        continue;
+       }
+    else
+    if (strcmp(argv[iArg],"-cert") == 0)
+    {
+      printf("in -cert\n");
+      function_code = GENCERT    ;
+      continue;
+    }
+    else
+     if (strcmp(argv[iArg],"-debug") == 0
+        && iArg +1 < argc) // we have a value
+        {
+          iArg  ++;
+          debug = atoi(argv[iArg]);
+          continue;
+        }
+    else
+     if (strcmp(argv[iArg],"-detail") == 0
+        && iArg +1 < argc) // we have a value
+        {
+          iArg  ++;
+          detail = atoi(argv[iArg]);
+          continue;
+        }
+    else
+     if (strcmp(argv[iArg],"-ca") == 0
+        && iArg + 1 < argc ) // so we have parm after kw
+     {
+       char * pParm = argv[iArg+1];
+       if (strlen(pParm) <= 8  )
+       {
+         CA_domain[0]= strlen(pParm);
+         memcpy(&CA_domain[1],pParm,strlen(pParm));
+         number_parameters = 6;
+       }
+       else
+       printf("-ca value too long\n");
+       iArg ++;
+       continue;
+     }
+    else
+     if (strcmp(argv[iArg],"-log") == 0
+        && iArg +1 < argc) // we have a value
+        {
+          iArg  ++;
+          int lLog = strlen(argv[iArg]);
+          if ( lLog > sizeof(log_string))
+          {
+            printf("-log value is too long truncated to length 16\n");
+            lLog = sizeof(log_string);
+          }
+          memset(&log_string.value,' ',sizeof(log_string));
+          memcpy(&log_string.value,argv[iArg],lLog);
+          continue;
+        }
+    // end of special processing
+    if (iArg+1 < argc) // make sure we have a value
+    {
+      found = parsePKI(pCert,pEnd,argv[iArg],argv[iArg+1]);
+    }
+    if (found >  0)
+    {
+      pCert += found;  /* size of data */
+      iArg ++; // over the value
+      continue;
+    }
+    if (found == 0)
+    {  // not found
+      printf("parameter not found %s\n",argv[iArg]);
+      rc = 4;
+    } // not found
+    else
+    if (found <0  )
+    {
+      return 12; // buffer problem
+     }
+   }   // for outer - paramters
+   #ifdef del
+   memcpy(pCert,"NotAfter    ",12);
+             pCert += 12;         // past it
+   int ii = 4;
+             memcpy(pCert,&ii,4);  // length of object
+             pCert += 4;
+       ii = 500;
+             memcpy(pCert,&ii ,4);  // length of value
+             pCert += 4;
+  #endif
+   // if it was not a valid keyword
+   if ( function_code == REQCERT)
+      printf("function is :req\n");
+   else
+      printf("function is :cert\n");
+#ifdef temp
+   if ( needRequestor > 0)
+   {
+      printf("Required paramter -r missing\n");
+      rc = 4;
+   }
+#endif
+   if ( needSW        > 0)
+   {
+      printf("Required paramter -sw missing\n");
+      rc = 4;
+   }
+
+   if ( function_code == 0)
+   {
+      printf("Required paramter -req | -cert ");
+      rc = 4;
+   }
+   if ( rc > 0)
+     return rc;
+  //
+  // we've now checked the parameters
+  //
+  // length = current position - start
+  gencert_parmlist.certPlistLen = pCert -   &certPlist[0];
+//printf("size of certPlistLen %i\n", gencert_parmlist.certPlistLen);
+  pCert =  &certPlist[0];
+  pEnd =  &certPlist[0] + gencert_parmlist.certPlistLen;
+  /* display the details before execution */
+  printf("Parameters before the call\n");
+  for ( pCert =  &certPlist[0];pCert < pEnd;)
+  {
+    printf("  %12.12s.:",pCert);
+    pCert +=12; // past the name
+    memcpy(&l,pCert,4); // save the length
+    pCert +=4;  // past the length
+    printf("%*.*s.\n",l,l,pCert); //print the content
+    pCert +=l; // and past the content
+  }
+  printf("==========================\n");
+
+  rc =IRRSPX00(&work_area,
+      & alet,& safrc,
+      & alet,& racfrc,
+      & alet,& racfrs,
+      & number_parameters,
+      & function_code,
+      & attributes,
+      & log_string,
+      & parmlist_version,
+      & gencert_parmlist,
+      & CA_domain
+      );
+  printf("rc %i safrc %i racfrc %i racfrs %i\n",rc,safrc,racfrc,racfrs);
+  pCert =  &certPlist[0];
+  // save the value of the error message (if any)
+  pCert +=12;
+  memcpy(&l,pCert,4);
+  pCert +=4;
+  if ( safrc + racfrc + racfrs > 0)
+  {
+    printf("rc %i safrc %i racfrc %i racfrs %i\n",
+           rc,safrc,racfrc,racfrs);
+    PKIMessage("GENCERT",safrc,racfrc,racfrs);
+    printf("error text returned:%*.*s.\n",l,l,pCert);
+    printHex(stdout,&certPlist[0],gencert_parmlist.certPlistLen);
+  }
+
+  if ( safrc == 0)
+  {
+    printf("CertID generated:%56.56s\n",&certId[1] );
+    if (debug > 1)
+    printHex(stdout,&certId[0],64);
+  }
+  char * pMySerial = 0;
+  //  return the validity dates - for approve
+  //char validity[41];
+  reqdetails(certId,&anchor1    );
+  //reqdetails(certId,&validity[0]);
+  #pragma pack(1)
+  struct {
+    short count;
+    int name1;
+    short lValue1;
+    char value1[32];
+  //int name2;
+  //int lValue2;
+  //int value2;
+  } st;
+  #pragma pack(reset)
+  //
+  // display those records with the same label
+  //
+  st.name1 = CKA_LABEL        ;
+  st.lValue1 = 32;
+  memcpy(&st.value1[0],&certId[1],32);
+  st.count   = 1   ;
+  char * pToken = "PKISRVD.PKITOKEN                 ";
+  getToken(pToken,(char *)&st,sizeof(st));
+
+  // ==================================================
+  // display those records with the same serial number
+  //
+  //printf("myserial2 %8.8X\n",pMySerial);
+  //if ( pMySerial != 0)
+  {
+    int ll =  anchor1.serial[0];
+    st.value1[0] = 0x02; // integer  der format
+    st.count   = 1   ;
+    st.name1 = CKA_SERIAL_NUMBER;
+    getHex(ll,&anchor1.serial[1],&st.value1[1],DER);
+//  printf("Line 308 \n");
+//  printHex(stdout,&st.value1[0],16);
+    // der  value is 02 (is int), length, data
+    st.lValue1  = 1 + 1 + st.value1[1]; // int,len,+derlength
+    pToken = "PKISRVD.PKITOKEN                 ";
+    pSerial = 0;
+    pXToken  = 0;
+    getToken(pToken,(char *)&st,2+4+2+st.lValue1);
+//  printf("PXTOLKEN  %d\n,",pXToken);
+    if (pXToken != 0)
+    {
+      printf("RACDCERT IMPORT(TOKEN(%32.32s) - \n",pXToken);
+      printf("  SEQNUM(%8.8s)) - \n",pXToken+ 32);
+      printf("  ID(...) WITHLABEL('...')\n");
+    }
+  }
+  return rc;
+}
+ #include <reqdetai.h>  // colin special
+ #include <TLIST3.h>  // colin special
+ #include <TLIST4.h>  // colin special

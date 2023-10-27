@@ -1,0 +1,40 @@
+// #define _XOPEN_SOURCE 600
+// fine _XOPEN_SOURCE                /* Required for optarg, optind */
+#pragma runopts(POSIX(ON))
+// #define _XOPEN_SOURCE
+// #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+int main( int argc, char *argv??(??))
+{
+  // extern char  *optarg;
+  int opt;
+//opterr = 0;
+  while ((opt = getopt(argc, argv, "ab:c:")) != -1)
+   {
+       printf("optind %d\n",optind);
+       switch (opt) {
+       case 'a':
+           printf("-a received\n");
+           break;
+       case 'b':
+           printf("-b received \n");
+           if (optarg!= 0)
+             printf("-b received value %s\n",optarg);
+           else
+             printf("-b optarg is missing\n");
+           break;
+       case 'c':
+           printf("-c received\n");
+           if (optarg)
+             printf("-c received value %s\n",optarg);
+           else
+             printf("-c optarg is missing\n");
+           break;
+       default: /* '?' */
+           printf("Unknown n");
+     }
+   }
+  return 0;
+}

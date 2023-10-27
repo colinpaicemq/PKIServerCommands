@@ -1,0 +1,141 @@
+   /*Include standard libraries */
+   // query certs
+ #pragma runopts(POSIX(ON))
+ #include <unistd.h>
+ #include <stdio.h>
+ #include <stdlib.h>
+ #include <string.h>
+ #include <string.h>
+ #include </usr/include/csfbext.h>
+ #include <printhx.h>  // colin special
+ #include <cppkig.h>  // colin special
+ #include <pkimsg.h>  // colin special
+char * addValue(char * where,char * kw,char * value);
+int main( int argc, char *argv??(??))
+{
+// #define  querycerts_pl       1
+ #define QUERYCERTS_PARMLIST
+ #include <cppki.h>  // colin special
+  printf("====QUERYCTS======\n");
+  #include <quparse.h>
+  int loopCount;
+  function_code = QUERYCERTS;
+  for(loopCount = 0;; loopCount++ )
+  {
+//  printHex(stdout,&serialNum[0],                    16);
+    querycerts_parmlist.serialNum    = &serialNum[0];
+    querycerts_parmlist.resultsListLen = sizeof(resultsList);
+    rc =IRRSPX00(&work_area,
+        & alet,& safrc,
+        & alet,& racfrc,
+        & alet,& racfrs,
+        & number_parameters,
+        & function_code,
+        & attributes,
+        & log_string,
+        & parmlist_version,
+        & querycerts_parmlist,
+        &CA_domain
+        );
+    if (safrc+racfrc+racfrs != 0) break;
+//  printf("rc %i safrc %i racfrc %i racfrs %i\n",
+//      rc,safrc,racfrc,racfrs);
+// update the serial number to current - for get next
+    char * pData = &resultsList[0];
+    memcpy(&serialNum[0],
+        pData,17   );  // the first field is the serial number
+    long lData;
+    #define PRINTDATA(a) \
+      lData = * pData;   \
+      printf("%16.*s %s:  %*.*s\n",lSerial,pSerial,a, \
+             lData,lData,pData + 1);     \
+      pData += 1 + lData;
+
+     char * pSerial;
+     int    lSerial;
+     // update the serial number for get next
+     //  1 byte length followed by 16 chars
+// memcpy(&querycerts_pl.serialNum[0],
+// pData,17   );  // the first field is the serial number
+      lSerial =  * pData;
+      pSerial =  1+pData;
+//    printHex(stdout,pSerial,lSerial);
+
+      PRINTDATA("Serial         ");
+      PRINTDATA("Requestors name");
+      PRINTDATA("Subject DN     ");
+      PRINTDATA("Issuer  DN     ");
+      PRINTDATA("Validity       ");
+      PRINTDATA("Key usage      ");
+      PRINTDATA("Status         ");
+      PRINTDATA("Created        ");
+      PRINTDATA("Modified       ");
+      PRINTDATA("ApplData       ");
+      PRINTDATA("ExtKeyUsage    ");
+//  printHex(stdout,pData,16);
+      PRINTDATA("KeyId          ");
+      printf("\n");
+  } // for
+  if (safrc ==  8 && safrc ==  8 && racfrs ==  60)
+     ;      // normal end of file
+   else
+   {
+     printf("rc %i safrc %i racfrc %i racfrs %i\n",
+             rc,safrc,racfrc,racfrs);
+     if (safrc+racfrc+racfrs > 0)
+     {
+       PKIMessage("QUERYCERTS",safrc,racfrc,racfrs);
+       return 8;
+     }
+   }
+  return rc;
+}
+#ifdef delete
+char * addValue(char * where,char * kw,char * value)
+{
+  memcpy(where,"            ",12); // blank it
+  int l= strlen(kw);
+  if (l > 12)
+  {
+    printf("Keyword %s is too big\n",kw);
+    l = 12;
+  }
+  memcpy(where,kw,l);  // move the kw
+  where += 12;         // past it
+  l = strlen(value);
+  memcpy(where,&l,4);  // length of object
+  where += 4;
+  memcpy(where,value,l);  // length of value
+  where += l;
+  return where;
+}
+#endif
+#ifdef del
+  struct {
+    char eyeCatcher[8];
+    int resultsListLen;
+    char * resultsList;
+    char * serialNum;
+    int numEntries;
+    int criteriaStatus;
+    int criteriaDays  ;
+    char * criteriaName;
+  } querycerts_pl;
+  memset(&querycerts_pl,0,sizeof(querycerts_pl));
+  memcpy(&querycerts_pl.eyeCatcher[0],"QUERYCTS",8);
+  char serialNum[17];
+  memset(&serialNum[0],0,17);
+  char resultsList[4096];
+  querycerts_pl.resultsListLen = sizeof(resultsList);
+  querycerts_pl.resultsList        = &resultsList[0];
+  querycerts_pl.serialNum          = &serialNum[0];
+  querycerts_pl.numEntries         = 1;
+  querycerts_pl.criteriaStatus = 0;
+  querycerts_pl.criteriaDays = 0;
+  char criteriaName[33];
+  memset(&criteriaName[0],0,33);
+  querycerts_pl.criteriaName = &criteriaName[0];
+  char certid[57];
+  int rc;
+  char CA_domain;
+  #endif

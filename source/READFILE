@@ -1,0 +1,45 @@
+int readFile(char * inBuffer,int len)
+{
+  char buffer[80];
+  FILE * in;
+  char * pBuffer = inBuffer;
+  int numRead;
+  int l ;
+  in = fopen("dd:CERT", "rb,type=record");
+//in = fopen("dd:CERT", "r");
+  if ( in == NULL)
+  {
+    perror("Opening dd:CERt");
+    printf("Error opening //CERT\n");
+    return 0;
+  }
+  printf("//CERT opened OK\n");
+  while ( 1 ) {
+     numRead = fread(&buffer, 1, sizeof(buffer), in);
+//    printf("part1 numRead %i\n",numRead);
+     if (numRead == 0 ) return 0;
+     if (numRead >=35
+        && memcmp(buffer,"-----BEGIN CERTIFICATE REQUEST-----",35) ==0)
+        break;
+  }
+  while ( 1 ) {
+     numRead = fread(&buffer, 1, sizeof(buffer), in);
+  // printf("part2 numRead %i\n",numRead);
+     if (numRead == 0 ) return 0 ;
+     if (numRead >=33
+        && memcmp(buffer,"-----END CERTIFICATE REQUEST-----",33) ==0)
+        break;
+//   printf("data %*.*s\n",numRead,numRead,buffer);
+     memcpy(pBuffer,buffer,numRead);
+     pBuffer+= numRead;
+     if (pBuffer - buffer +80 > len)
+     {
+     printf("File buffer is too small:%i",len);
+     return 0;
+     }
+  }
+  l   = pBuffer - inBuffer;
+  printf("Size of data in the file %i\n",l  );
+  return l  ;
+}
+

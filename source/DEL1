@@ -1,0 +1,19 @@
+     char ID;
+     char * pID = "Unknown";
+     ID = output_list[40];
+     switch(ID)
+     {
+        case 'S':pID = "Clear session object"; break;
+        case 'T':pID = "Clear token object"; break;
+        case 'U':pID = "Clear state object"; break;
+        case 'X':
+           pID = "Enterprise PKCS #11 secure session object";break;
+        case 'Y':
+           pID = "Enterprise PKCS #11 secure token object";break;
+        case 'Z':
+           pID = "Enterprise PKCS #11 secure state object";break;
+     }
+//   printf("returned length %d\n",lList);
+//   printf("handle count    %d\n",handle_count);
+     printf("ZZKEN:%.32s Sequence:%.8s ID:%s\n",
+            output_list,output_list[32],pID);

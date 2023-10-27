@@ -1,0 +1,46 @@
+/* REXX   */
+ PKI_rc = 'FFFFFFFF'x ;
+ PKI_rs = 'FFFFFFFF'x ;
+ exit_data_length = '00000000'x ;
+ exit_data = '' ;
+ rule_array_count = '00000000'x
+ rule_array = ''
+ handle =   'PKISRVD.PKITOKEN                0000000FT'
+ attribute   = copies('0',2000  )
+ attribute_l = d2c(2000,4)
+ ADDRESS LINKPGM 'CSFPGAV' ,
+    'PKI_rc' ,
+    'PKI_rs' ,
+    'exit_data_length' , /* ignored */
+    'exit_data' ,        /* ignored */
+    'handle',
+    'rule_array_count',
+    'rule_array',
+    'attribute_l',
+    'attribute';
+/*say PKI_rc PKI_rc */
+ rc  = C2d(PKI_rc)
+ rs  = C2d(PKI_rs)
+say "rc "  rc    "rs"  rs
+say  substr(attribute  ,1,116)
+say  c2x(substr(attribute  ,1,2))
+say  c2x(substr(attribute  ,3,6))
+say  c2x(substr(attribute  ,7,2))
+say  c2x(substr(attribute  ,9,12))
+say "length"  c2d(attribute_l)
+
+ /*
+ CALL CSFPTRL(
+ return_code,
+ reason_code,
+ exit_data_length,
+ exit_data,
+ handle,
+ rule_array_count,
+ rule_array,
+ search_template_length,
+ search_template,
+ list_length,
+ handle_count,
+ output_list
+ */

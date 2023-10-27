@@ -1,0 +1,469 @@
+char * PKIMessage(char * function,int safrc,int racfrc,int racfrs)
+{
+char * pReturn = "";
+#define TAB(a,b,c,d) \
+else if (safrc == a && racfrc == b && racfrs == c) \
+{        \
+   printf("%s\n", d);       \
+   pReturn =  d;     \
+}
+//
+// common return codes
+//
+  printf("%s:",function); // display the function
+  if (1 == 0)
+    { // do nothing)
+    }
+  TAB( 0 , 0 , 0 , "Successful completion ")
+  TAB( 4 , 0 , 0 , "RACF not installed ")
+  TAB( 8 , 8 , 4 ,"A parameter list error has been "
+   "detected. See Usage Notes for further "
+   "details "
+  )
+  TAB( 8 , 8 , 8 ,"The caller of this service has not been "
+   "RACF authorized to use this callable "
+    "service "
+  )
+  TAB( 8 , 8 , 12 ,"An internal error has occurred during "
+   "RACF processing of the requested "
+    "function "
+  )
+  TAB( 8 , 8 , 16 ,"Unable to establish a recovery "
+   "environment "
+  )
+  TAB( 8 , 8 , 20 , "Function code specified is not defined ")
+  TAB( 8 , 8 , 24 ,"Parameter list version specified is not "
+   "supported "
+  )
+  TAB( 8 , 8 , 28 ,"Certificate generation provider not "
+   "available - start PKISERVD"
+  )
+  TAB( 8 , 8 , 32 ,"Incorrect value specified for CA_domain. "
+   "Either the length is greater than 8 or "
+   "the value contains characters that are "
+   "not valid "
+  )
+// TAB( 8 , 12 , xx ,"Certificate generation provider internal "
+// "error. Reason code is the reason code "
+//  "from provider "
+// );
+/*2*/if (strcmp(function,"GENCERT") == 0 ||
+         strcmp(function,"REQCERT") == 0
+        )
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 4 , 4 , 0 ,"Successful completion. However, "
+   "notification of the TID through email is "
+    "unsuccessful. "
+  )
+  TAB( 8 , 8 , 40 , "CertPlist has an incorrect length ")
+  TAB( 8 , 8 , 44 ,"CertPlist DiagInfo field missing or has "
+   "an incorrect length "
+  )
+  TAB( 8 , 8 , 48 ,"Incorrect field name specified in "
+   "CertPlist. The field name is either "
+    "unknown or not supported by this "
+    "certificate generation provider "
+  )
+  TAB( 8 , 8 , 52 ,"Incorrect field value specified in "
+   "CertPlist "
+  )
+  TAB( 8 , 8 , 56 ,"Required field is missing from the "
+   "CertPlist "
+  )
+  TAB( 8 , 8 , 60 ,"Certificate generation provider input or "
+   "environment error "
+  )
+  TAB( 8 , 8 , 64 ,"PKCS#11 Token Service encountered an "
+   "error. "
+  )
+  TAB( 8 , 8 , 68 ,"Notification form is not set up "
+   "correctly in the case of key generation. "
+  )
+  TAB( 8 , 8 , 76 ,"Conflicting field names specified in "
+   "CertPlist. "
+  )
+  TAB( 8 , 8 , 80 ,"Enrollment over Secure Transport (EST) "
+   "disabled. "
+  )
+  TAB( 8 , 8 , 84 ,"No preregistration record found for the "
+   "EST request or unable to authenticate "
+    "it. "
+  )
+}
+else
+/*3*/if (strcmp(function,"EXPORT"   )== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 0 , 0 , 0 ,"Successful completion. If the "
+   "PKICACERT CertId was not specified, "
+   "the returned value is in Base64 encoded "
+    "DER format, either a X.509 certificate "
+    "or a PKCS#7 package. If the PKICACERT "
+    "CertId was specified, then the returned "
+    "certificate package contains just the "
+    "X.509 CA certificate in DER format. "
+  )
+  TAB( 0 , 0 , 1 ,"Successful completion. If the "
+   "PKICACERT CertId was specified, the "
+   "PKICACERT CertId was specified, the "
+    "returned certificate package is the "
+    "RA/CA PKCS #7 certificate chain in DER "
+    "format. If the PKICACHAIN CertID was "
+    "specified, the returned certificate "
+    "package is the CA PKCS #7 certificate "
+    "chain in DER format. "
+  )
+  TAB( 0 , 0 , 2 ,"Successful completion. If serial number "
+   "was specified in CertId, the returned "
+    "certificate package contains the PKCS12 "
+    "package in DER format. "
+  )
+  TAB( 8 , 8 , 40 , "CertAnchor area missing ")
+  TAB( 8 , 8 , 44 , "CertAnchor area too small ")
+  TAB( 8 , 8 , 48 ,"Incorrect CertID (transaction ID or "
+   "serial number) specified "
+  )
+  TAB( 8 , 8 , 52 , "Incorrect PassPhrase specified ")
+  TAB( 8 , 8 , 56 ,"Request is still pending approval or has "
+   "yet to be issued "
+  )
+  TAB( 8 , 8 , 60 ,"Request has been rejected by the "
+   "administrator "
+  )
+  TAB( 8 , 8 , 64 ,"PKCS#11 Token Service has encountered an "
+   "error. "
+  )
+  TAB( 8 , 8 , 68 ,"Incorrect KeyId specified or private key "
+   "object in TKDS not found. "
+  )
+  TAB( 8 , 8 , 72 ,"PKICACERT CertId specified, but SCEP "
+   "is disabled or PKICACHAIN CertID is "
+    "specified, but Enrollment over Secure "
+    "Transport (EST) is disabled. "
+  )
+}
+else
+/*4*/if (strcmp(function,"QUERYREQS")== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "Results list area missing. ")
+  TAB( 8 , 8 , 44 , "Results list area too small. ")
+  TAB( 8 , 8 , 48 , "Incorrect CertId specified. ")
+  TAB( 8 , 8 , 56 , "Incorrect status criteria specified. ")
+  TAB( 8 , 8 , 60 , "No requests satisfy the input criteria. ")
+}
+else
+/*5*/if (strcmp(function,"REQDETAILS") == 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "Summary list or CertPlist area missing. ")
+  TAB( 8 , 8 , 44 ,"Summary list or CertPlist area too "
+   "small. "
+  )
+  TAB( 8 , 8 , 48 , "Incorrect CertId specified. ")
+  TAB( 8 , 8 , 52 ,"Success, however name fields not "
+   "returned in CertPlist. "
+  )
+  TAB( 8 , 8 , 64 ,"Not authorized to display the details of "
+   "the request under a specific template. "
+  )
+ }
+else
+/*6*/if (strcmp(function,"MODIFYREQS")== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "CertPlist has an incorrect length. ")
+  TAB( 8 , 8 , 44 ,"CertPlist DiagInfo field missing or has "
+   "an incorrect length. "
+  )
+  TAB( 8 , 8 , 48 ,"Incorrect field name specified in "
+   "CertPlist. "
+  )
+  TAB( 8 , 8 , 52 ,"Incorrect field value specified in "
+   "CertPlist. "
+  )
+  TAB( 8 , 8 , 56 , "Required field missing from CertPlist. ")
+  TAB( 8 , 8 , 60 ,"Certificate generation input or "
+   "environment error. "
+  )
+  TAB( 8 , 8 , 64 ,"CertIds has an incorrect length or "
+   "value. "
+  )
+  TAB( 8 , 8 , 68 , "Incorrect Action specified. ")
+  TAB( 8 , 8 , 72 ,"One or more requests could not be "
+   "modified because of a state or content "
+    "change.\nCertIds contains the certificate "
+    "request Ids that could not be modified. "
+    "\nErrList contains the corresponding error "
+    "description. "
+  )
+  TAB( 8 , 8 , 76 ,"One or more requests could not be "
+   "approved again because the request(s) "
+   "has/have been approved by the same "
+   "administrator. CertIds contains the "
+   "certificate request Ids that could not "
+   "be modified. ErrList contains the "
+   "corresponding error description. "
+  )
+  TAB( 8 , 8 , 96 ,"One or more requests could not be "
+   "modified because the user is not "
+   "authorized to perform the action on the "
+   "requests under that template. CertIds "
+   "contains the certificate request Ids "
+   "that could not be modified. ErrList "
+   "contains the corresponding error "
+   "description. "
+  )
+  TAB( 8 , 8 , 100 ,"Incorrect time stamp specified. The "
+   "expected format is YYYY/MM/DD HH:MM:SS "
+  )
+}
+else
+/*7*/if (strcmp(function,"QUERYCERTS") == 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "Results list area missing. ")
+  TAB( 8 , 8 , 44 , "Results list area too small. ")
+  TAB( 8 , 8 , 48 , "Incorrect SerialNum specified. ")
+  TAB( 8 , 8 , 56 , "Incorrect status criteria specified. ")
+  TAB( 8 , 8 , 60 ,"No certificates satisfy the input "
+   "criteria. "
+  )
+
+}
+else
+/*8*/if (strcmp(function,"CERTDETAILS") == 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+
+  TAB( 8 , 8 , 40 , "Summary list or CertPlist area missing. ")
+  TAB( 8 , 8 , 44 ,"Summary list or CertPlist area too "
+   "small. "
+  )
+  TAB( 8 , 8 , 48 , "Incorrect SerialNum specified. ")
+  TAB( 8 , 8 , 64 ,"Not authorized to display the details of "
+   "the certificate under a specific "
+    "template. "
+  )
+}
+else
+/*9*/if (strcmp(function,"MODIFYCERTS")== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "Incorrect Reason specified. ")
+  TAB( 8 , 8 , 52 ,"Incorrect field value specified in "
+   "RequestorEmail. "
+  )
+  TAB( 8 , 8 , 64 ,"SerialNums has an incorrect length or "
+   "value. "
+  )
+  TAB( 8 , 8 , 68 , "Incorrect Action specified. ")
+  TAB( 8 , 8 , 72 ,"One or more certificates cannot be set "
+   "up for automatic renewal. \n  SerialNums "
+   "contains the certificate serial numbers "
+   "that could not be set up for automatic "
+   "renewal.\n  ErrorList contains the "
+   "corresponding error description. "
+  )
+  TAB( 8 , 8 , 80 ,"RequestorEmail could not be modified "
+   "because the key of the certificate was "
+   "not generated by PKI Services. "
+  )
+  TAB( 8 , 8 , 84 ,"More than one serial number is requested "
+   "for RequestorEmail change. "
+  )
+  TAB( 8 , 8 , 88 ,"One or more certificates could not be "
+   "deleted from the TKDS although they were "
+  )
+  TAB( 8 , 8 , 92 ,"CRL or Certificate posting is not "
+   "configured. "
+  )
+  TAB( 8 , 8 , 96 ,"One or more certificates could not be "
+   "modified because the calling userid is "
+   "not authorized to perform the modify "
+    "action for the given template (if "
+    "applicable) and CA domain. The "
+    "SerialNums parameter contains the serial "
+    "number of the certificates that could "
+    "not be modified. The ErrList parameter "
+    "contains the corresponding error "
+    "description for each of the failing "
+    "serial numbers. "
+  )
+}
+
+else
+/*10*/if (strcmp(function,"VERIFY"     )== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "Summary list or CertPlist area missing. ")
+  TAB( 8 , 8 , 44 ,"Summary list or CertPlist area too "
+   "small. "
+  )
+  TAB( 8 , 8 , 64 , "Incorrect certificate specified. ")
+  TAB( 8 , 8 , 40 , "Incorrect Reason specified. ")
+}
+
+else
+/*11*/if (strcmp(function,"REVOKE"     )== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 64 ,"SerialNum has an incorrect length or "
+   "value. "
+  )
+  TAB( 8 , 8 , 72 ,"The certificate could not be revoked "
+   "because of a state change. "
+  )
+}
+
+else
+/*12*/if (strcmp(function,"GENRENEW") == 0 ||
+          strcmp(function,"REQRENEW")   == 0
+         )
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 4 , 4 , 0 ,"Successful completion. But notification "
+   "of the TID through email was "
+    "unsuccessful. "
+  )
+  TAB( 8 , 8 , 40 , "CertPlist has an incorrect length. ")
+  TAB( 8 , 8 , 44 ,"CertPlist DiagInfo field missing or has "
+   "an incorrect length. "
+  )
+  TAB( 8 , 8 , 48 ,"Incorrect field name specified in "
+   "CertPlist. The field name is either "
+   "unknown or not supported by this "
+   "certificate generation provider. "
+  )
+  TAB( 8 , 8 , 52 ,"Incorrect field value specified in "
+   "CertPlist. "
+  )
+  TAB( 8 , 8 , 56 , "Required field missing from CertPlist. ")
+  TAB( 8 , 8 , 60 ,"Certificate generation input or "
+   "environment error. "
+  )
+  TAB( 8 , 8 , 64 ,"SerialNum has an incorrect length or "
+   "value. "
+  )
+  TAB( 8 , 8 , 68 ,"Notification form is not set up "
+   "correctly for key generation. "
+  )
+  TAB( 8 , 8 , 72 ,"The certificate could not be renewed "
+   "because of a state change. "
+  )
+  TAB( 8 , 8 , 76 ,"Conflicting field names specified in "
+   "CertPlist. "
+  )
+  TAB( 8 , 8 , 80 ,"The certificate could not be renewed "
+   "because the requester's email has "
+    "changed. "
+  )
+  TAB( 8 , 8 , 84 ,"Enrollment over Secure Transport (EST) "
+   "disabled. "
+)
+}
+
+else
+/*13*/if (strcmp(function,"RESPOND")     == 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "Response area missing. ")
+  TAB( 8 , 8 , 44 , "Response area too small. ")
+  TAB( 8 , 8 , 64 , "Incorrect request specified. ")
+  TAB( 8 , 8 , 72 , "Responder disabled. ")
+}
+
+else
+/*14*/if (strcmp(function,"SCEPREQ"     )== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "Response area missing. ")
+  TAB( 8 , 8 , 44 , "Response area too small. ")
+  TAB( 8 , 8 , 64 , "Incorrect request specified. ")
+  TAB( 8 , 8 , 72 , "SCEP disabled. ")
+}
+
+else
+/*15*/if (strcmp(function,"PREREGISTER")== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "CertPlist has an incorrect length ")
+  TAB( 8 , 8 , 44 ,"CertPlist DiagInfo field missing or has "
+   "an incorrect length "
+  )
+  TAB( 8 , 8 , 48 ,"Incorrect field name specified in "
+   "CertPlist. The field name is either "
+   "unknown or not supported by this "
+   "certificate generation provider "
+  )
+  TAB( 8 , 8 , 52 ,"Incorrect field value specified in "
+   "CertPlist "
+  )
+  TAB( 8 , 8 , 56 , "Required field missing from CertPlist ")
+  TAB( 8 , 8 , 60 ,"Certificate generation provider input or "
+   "environment error "
+  )
+  TAB( 8 , 8 , 72 , "Client already preregistered ")
+  TAB( 8 , 8 , 76 ,"Not authorized to preregister a client "
+   "under a specific template. "
+  )
+}
+
+else
+if (strcmp(function,"QRECOVER"   )== 0)
+{
+  if (1 == 0)
+  { // do nothing)
+  }
+  TAB( 8 , 8 , 40 , "Results list area missing. ")
+  TAB( 8 , 8 , 44 , "Results list area too small. ")
+  TAB( 8 , 8 , 48 ,"Incorrect requester’s email address "
+   "specified. "
+  )
+  TAB( 8 , 8 , 52 , "Incorrect pass phrase specified. ")
+  TAB( 8 , 8 , 56 , "Notify form is not set up correctly. ")
+  TAB( 8 , 8 , 60 ,"No certificates satisfy the input "
+   "criteria. "
+  )
+  TAB( 8 , 8 , 64 , "Notify email cannot be sent. ")
+}
+else
+  printf("Unknown function %s\n",function);
+
+if (strlen(pReturn) == 0)
+{
+ printf("Unknown rc. Function %s SAFRC %d RACFRC %d RACFRS %d\n",
+        function,safrc,racfrc,racfrs);
+ pReturn = "Unknown values \n";
+ }
+return pReturn;
+}
